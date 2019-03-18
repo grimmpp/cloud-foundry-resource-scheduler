@@ -1,5 +1,6 @@
 package grimmpp.AppManager.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,11 +9,16 @@ import grimmpp.AppManager.model.cfClient.Result;
 import grimmpp.AppManager.model.cfClient.ServiceInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +36,7 @@ public class CfClient {
     public static final String URI_BINDINGS_BY_SERVICE_INSTANCE_ID = "/v2/service_instances/%s/service_bindings";
     public static final String URI_APPS = "/v2/apps";
     public static final String URI_SINGLE_APP = "/v2/apps/%s";
+    public static final String URI_APPS_OF_SPACE = "/v2/spaces/%s/apps";
 
     @Autowired
     @Qualifier("baseUrl")
@@ -48,6 +55,18 @@ public class CfClient {
         }
 
         return resources;
+    }
+
+    public <Entity> Entity updateResource(String absoluteUrl, Object payload, Class<Entity> entityType) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        String body = objectMapper.writeValueAsString(payload);
+
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.PUT, request, String.class);
+
+        if (resp.getBody() == null) return null;
+        return objectMapper.readValue(resp.getBody(), entityType);
     }
 
     public <Entity> Resource<Entity> getResource(String absoluteUrl, Class<Entity> entityType) throws IOException {

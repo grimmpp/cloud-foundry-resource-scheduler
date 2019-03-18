@@ -42,7 +42,7 @@ public class CatalogConfig {
 
                             Plan.builder()
                                     .id("4e1020f9-6577-4ba3-885f-95bb978b4939")
-                                    .name("Switch Space off")
+                                    .name("Switch Off Apps in Space")
                                     .description("Stops all Apps in a space where this service plan is instanced, except in spaces which contain prod in the name in order to avoid downtime of apps in productive spaces. ")
                                     .bindable(true)
                                     .free(true)
