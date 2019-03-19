@@ -1,7 +1,7 @@
 package grimmpp.AppManager.cfClient;
 
 import grimmpp.AppManager.AppManagerApplication;
-import grimmpp.AppManager.mocks.MockController;
+import grimmpp.AppManager.mocks.CfApiMockController;
 import grimmpp.AppManager.model.cfClient.*;
 import grimmpp.AppManager.service.CfClient;
 import org.junit.Assert;
@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
@@ -20,15 +19,12 @@ import java.util.List;
 public class CfClientTest {
 
     @Autowired
-    ApplicationContext appContext;
-
-    @Autowired
     CfClient cfClient;
 
     @Test
     public void convertJsonTest() throws IOException {
 
-        String restCallResponse = MockController.getResourceContent("serviceInstancesByPlanId");
+        String restCallResponse = CfApiMockController.getResourceContent("serviceInstancesByPlanId");
 
         Result<ServiceInstance> result = cfClient.castRESTResources(restCallResponse, ServiceInstance.class);
 

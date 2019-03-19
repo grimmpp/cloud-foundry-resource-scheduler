@@ -1,0 +1,46 @@
+{
+  "platform_instance_id": null,
+  "api_info_location": "api.dev.cfdev.sh/v2/info",
+  "originating_identity": {
+    "platform": "Context",
+    "platform": "cloudfoundry",
+    "user_id": "5fff7440-29eb-4f56-a0d1-16cfc6cc12e8"
+  },
+  "async_accepted": true,
+  "parameters": {
+    "time": "1w 3d 4h 2min"
+  },
+  "context": {
+    "platform": "cloudfoundry",
+    "platform": "cloudfoundry",
+    "organization_guid": "701e1662-9fc4-4842-a798-1c9992e435c9",
+    "space_guid": "359b04a4-1006-4c57-b14d-9dfec46f8e78"
+  },
+  "plan_id": "4e1020f9-6577-4ba3-885f-95bb978b4939",
+  "organization_guid": "701e1662-9fc4-4842-a798-1c9992e435c9",
+  "space_guid": "359b04a4-1006-4c57-b14d-9dfec46f8e78",
+  "service_instance_id": "8b07d88e-ac43-4a3a-93dc-cf54b389a541",
+  "service_definition": {
+    "id": "385fcdd0-f9f1-42c9-929a-93981441b0b1",
+    "name": "App Lifecycle Manager",
+    "description": "Provides several service plans in order to restart or switch off apps.",
+    "bindable": false,
+    "plans": [
+      {
+        "id": "4e1020f9-6577-4ba3-885f-95bb978b4939",
+        "name": "Switch Off Apps in Space",
+        "description": "Stops all Apps in a space where this service plan is instanced, except in spaces which contain prod in the name in order to avoid downtime of apps in productive spaces. ",
+        "bindable": true,
+        "free": true
+      }
+    ],
+    "metadata": {
+      "longDescription": "",
+      "documentationUrl": "",
+      "displayName": "App Manager Service",
+      "imageUrl": "",
+      "supportUrl": ""
+    }
+  },
+  "service_id": "385fcdd0-f9f1-42c9-929a-93981441b0b1"
+}

@@ -1,2 +1,17 @@
-local.server.port: 8111
-server.port: 8111
+VCAP_APPLICATION: '{ "application_id": "ae93a4ec-42c2-4087-b4f6-03d79c6aa822",  "application_name": "app-manager",  "application_uris": [   "app-manager.dev.cfdev.sh"  ],  "application_version": "3e42923e-f0da-4deb-923a-cbed0fa128b2",  "cf_api": "http://localhost:8111/cf_api_mock",  "limits": {   "disk": 1024,   "fds": 16384,   "mem": 1024  },  "name": "app-manager",  "space_id": "359b04a4-1006-4c57-b14d-9dfec46f8e78",  "space_name": "cfdev-space",  "uris": [   "app-manager.dev.cfdev.sh"  ],  "users": null,  "version": "3e42923e-f0da-4deb-923a-cbed0fa128b2" }'
+
+server:
+  protocol: http
+  port: 8111
+
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password: sa
+  h2.console.enabled: false
+  jpa.database-platform: org.hibernate.dialect.H2Dialect
+
+#  jpa.hibernate.ddl-auto: create-drop

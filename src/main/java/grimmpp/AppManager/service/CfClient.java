@@ -1,24 +1,21 @@
 package grimmpp.AppManager.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import grimmpp.AppManager.model.VcapApplication;
 import grimmpp.AppManager.model.cfClient.Resource;
 import grimmpp.AppManager.model.cfClient.Result;
 import grimmpp.AppManager.model.cfClient.ServiceInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +35,9 @@ public class CfClient {
     public static final String URI_SINGLE_APP = "/v2/apps/%s";
     public static final String URI_APPS_OF_SPACE = "/v2/spaces/%s/apps";
 
+
     @Autowired
-    @Qualifier("baseUrl")
-    private String baseUrl;
+    private VcapApplication vcapApp;
 
     public <Entity> List<Resource<Entity>> getResources(String absoluteUrl, Class<Entity> entityType) throws IOException {
         List<Resource<Entity>> resources = new ArrayList<>();
@@ -91,7 +88,7 @@ public class CfClient {
     }
 
     public String buildUrl(String resorucePath, String... args) {
-        String url = baseUrl + resorucePath + String.format(URL_PARAMETERS, 1);
+        String url = vcapApp.getCf_api() + resorucePath + String.format(URL_PARAMETERS, 1);
         for(String arg: args) url = String.format(url, arg);
 
         return url;

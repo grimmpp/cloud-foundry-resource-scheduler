@@ -15,20 +15,27 @@ ext {
 	version = '0.1.0.BUILD-SNAPSHOT'
 }
 
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
 repositories {
 	mavenCentral()
 }
 
 dependencies {
 	compile 'org.springframework.boot:spring-boot-starter-web'
-
+	compile 'org.springframework.boot:spring-boot-starter-data-jpa'
 	compile 'org.springframework.cloud:spring-cloud-starter-open-service-broker-webmvc:2.0.0.RELEASE'
 
-	compileOnly 'org.projectlombok:lombok:1.18.6'
-	annotationProcessor 'org.projectlombok:lombok:1.18.6'
-	
-	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	
+	testRuntimeOnly 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testCompile "junit:junit"
 }
