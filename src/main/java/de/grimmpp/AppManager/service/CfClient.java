@@ -34,6 +34,7 @@ public class CfClient {
     public static final String URI_APPS = "/v2/apps";
     public static final String URI_SINGLE_APP = "/v2/apps/%s";
     public static final String URI_APPS_OF_SPACE = "/v2/spaces/%s/apps";
+    public static final String URI_APP_INSTANCE = "/v2/apps/%s/instances/%s";
 
 
     @Autowired
@@ -52,6 +53,13 @@ public class CfClient {
         }
 
         return resources;
+    }
+
+    public void deleteResource(String absoluteUrl) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        HttpEntity<String> request = new HttpEntity<>("", headers);
+        ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.DELETE, request, String.class);
     }
 
     public <Entity> Entity updateResource(String absoluteUrl, Object payload, Class<Entity> entityType) throws IOException {
