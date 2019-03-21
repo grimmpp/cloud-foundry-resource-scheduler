@@ -33,6 +33,8 @@ public class ServicePlanAppRestarter implements IServicePlan {
                 String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, b.getApplicationId());
                 Resource<Application> app = cfClient.getResource(appUrl, Application.class);
 
+                //TODO: time check is missing
+
                 if (app.getEntity().getState().equals("STARTED")) {
                     for(int i=0; i<app.getEntity().getInstances();i++) {
                         String instanceUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCE, b.getApplicationId(), String.valueOf(i));
