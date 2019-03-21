@@ -76,7 +76,7 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
     public DeleteServiceInstanceResponse deleteServiceInstance(DeleteServiceInstanceRequest request) {
         logRequest(request);
 
-        paraRepo.deleteAll(paraRepo.findParametersByReference(request.getServiceInstanceId()));
+        paraRepo.deleteAll(paraRepo.findByReference(request.getServiceInstanceId()));
         siRepo.delete(siRepo.findByServiceInstanceId(request.getServiceInstanceId()));
 
         return DeleteServiceInstanceResponse.builder().build();
@@ -89,7 +89,7 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
 
         ServiceInstance si = siRepo.findByServiceInstanceId(request.getServiceInstanceId());
         if (si != null) {
-            List<Parameter> parameters = paraRepo.findParametersByReference(si.getServiceInstanceId());
+            List<Parameter> parameters = paraRepo.findByReference(si.getServiceInstanceId());
             Parameter.updateList(si.getServiceInstanceId(), parameters, request.getParameters());
             paraRepo.saveAll(parameters);
         }
@@ -122,7 +122,7 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
     public void deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
         logRequest(request);
 
-        List<Parameter> parameters = paraRepo.findParametersByReference(request.getBindingId());
+        List<Parameter> parameters = paraRepo.findByReference(request.getBindingId());
         paraRepo.deleteAll(parameters);
 
         Binding b = bindingRepo.findById(request.getBindingId()).get();

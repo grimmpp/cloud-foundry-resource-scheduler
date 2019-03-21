@@ -65,7 +65,7 @@ public class BrokerControllerTest {
         Assert.assertEquals(siId, si.getServiceInstanceId());
         Assert.assertEquals(planId, si.getServicePlanId());
 
-        List<Parameter> parameterList = parameterRepository.findParametersByReference(siId);
+        List<Parameter> parameterList = parameterRepository.findByReference(siId);
         Assert.assertEquals(1, parameterList.size());
         Assert.assertEquals(siId, parameterList.get(0).getReference());
         Assert.assertEquals("time", parameterList.get(0).getKey());
@@ -93,7 +93,7 @@ public class BrokerControllerTest {
         Assert.assertEquals(appId, b.getApplicationId());
         Assert.assertEquals(siId, b.getServiceInstanceId());
 
-        List<Parameter> parameterList = parameterRepository.findParametersByReference(bId);
+        List<Parameter> parameterList = parameterRepository.findByReference(bId);
         Assert.assertEquals(1, parameterList.size());
         Assert.assertEquals(bId, parameterList.get(0).getReference());
         Assert.assertEquals("time", parameterList.get(0).getKey());
@@ -114,7 +114,7 @@ public class BrokerControllerTest {
         Optional<Binding> b = bindingRepository.findById(bId);
         Assert.assertTrue( !b.isPresent() );
 
-        List<Parameter> parameterList = parameterRepository.findParametersByReference(bId);
+        List<Parameter> parameterList = parameterRepository.findByReference(bId);
         Assert.assertTrue( parameterList.isEmpty() );
 
         ServiceInstance si = serviceInstanceRepository.findByServiceInstanceId(siId);
@@ -137,7 +137,7 @@ public class BrokerControllerTest {
         ServiceInstance si = serviceInstanceRepository.findByServiceInstanceId(siId);
         Assert.assertTrue(si == null);
 
-        List<Parameter> parameterList = parameterRepository.findParametersByReference(siId);
+        List<Parameter> parameterList = parameterRepository.findByReference(siId);
         Assert.assertTrue( parameterList.isEmpty() );
     }
 
@@ -160,7 +160,7 @@ public class BrokerControllerTest {
         Assert.assertEquals(siId, si.getServiceInstanceId());
         Assert.assertEquals(planId, si.getServicePlanId());
 
-        List<Parameter> parameterList = parameterRepository.findParametersByReference(siId);
+        List<Parameter> parameterList = parameterRepository.findByReference(siId);
         boolean containsParameterTime = false;
         for(Parameter p: parameterList) {
             if (p.getKey().equals("time")) {

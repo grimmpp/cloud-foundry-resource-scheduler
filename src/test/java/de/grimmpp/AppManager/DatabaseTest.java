@@ -90,7 +90,7 @@ public class DatabaseTest {
         List<Parameter> parameterList = Lists.newArrayList(parameterRepository.findAll());
         Assert.assertEquals(2, parameterList.size());
 
-        parameterList = parameterRepository.findParametersByReference(id);
+        parameterList = parameterRepository.findByReference(id);
         Assert.assertEquals(1, parameterList.size());
     }
 

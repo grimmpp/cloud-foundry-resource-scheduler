@@ -35,6 +35,7 @@ public class CfClient {
     public static final String URI_SINGLE_APP = "/v2/apps/%s";
     public static final String URI_APPS_OF_SPACE = "/v2/spaces/%s/apps";
     public static final String URI_APP_INSTANCE = "/v2/apps/%s/instances/%s";
+    public static final String URI_APP_INSTANCES = "/v2/apps/%s/instances";
 
 
     @Autowired
@@ -81,6 +82,12 @@ public class CfClient {
         result = castRESTResource(resp.getBody(), entityType);
 
         return result;
+    }
+
+    public <Entity> Entity getObject(String absoluteUrl, Class<Entity> entityType) throws IOException {
+        ResponseEntity<String> resp = restTemplate.getForEntity(absoluteUrl, String.class);
+
+        return objectMapper.readValue(resp.getBody(), entityType);
     }
 
     public <Entity> Result<Entity> castRESTResources(String result, Class<Entity> entityType) throws IOException {
