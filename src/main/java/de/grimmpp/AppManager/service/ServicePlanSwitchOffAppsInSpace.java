@@ -23,6 +23,7 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
         String spaceUrl = cfClient.buildUrl(CfClient.URI_SINGLE_SPACE, si.getSpaceId());
         Resource<Space> space = cfClient.getResource(spaceUrl, Space.class);
 
+        // Check if space contains prod in its name.
         if (!space.getEntity().getName().toLowerCase().contains("prod")) {
 
             String url = cfClient.buildUrl(CfClient.URI_APPS_OF_SPACE, si.getSpaceId());

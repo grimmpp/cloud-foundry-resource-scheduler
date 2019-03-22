@@ -1,5 +1,7 @@
 package de.grimmpp.AppManager.config;
 
+import de.grimmpp.AppManager.service.ServicePlanAppRestarter;
+import de.grimmpp.AppManager.service.ServicePlanSwitchOffAppsInSpace;
 import org.springframework.cloud.servicebroker.model.catalog.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,15 +25,14 @@ public class CatalogConfig {
                         .metadata("documentationUrl", "")
                         .metadata("supportUrl","")
                         .plans(
-/*
                             Plan.builder()
-                                    .id("31b97c09-9cfb-4108-8894-33eb22016cee")
+                                    .id(ServicePlanAppRestarter.PLAN_ID)
                                     .name("App Restarter")
                                     .description("")
                                     .bindable(true)
                                     .free(true)
                                     .build(),
-
+/*
                             Plan.builder()
                                     .id("e3e8719a-2994-49f5-ac6a-e3fffc3673a4")
                                     .name("Rolling Container Restarter")
@@ -41,10 +42,10 @@ public class CatalogConfig {
                                     .build(),
 //*/
                             Plan.builder()
-                                    .id("4e1020f9-6577-4ba3-885f-95bb978b4939")
+                                    .id(ServicePlanSwitchOffAppsInSpace.PLAN_ID)
                                     .name("Switch Off Apps in Space")
                                     .description("Stops all apps after a defined time and in a space where this service plan is instanced, except in spaces which contain prod in the name in order to avoid downtime of apps in productive spaces. ")
-                                    .bindable(true)
+                                    .bindable(false)
                                     .free(true)
                                     .build()
 /*
