@@ -3,6 +3,7 @@ package de.grimmpp.AppManager.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.model.database.*;
+import de.grimmpp.AppManager.service.TimeParameterValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,6 +58,7 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
         logRequest(request);
 
         siRepo.save(new ServiceInstance(request));
+        long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(request, TimeParameterValidator.DEFAULT_VALUE);
         paraRepo.saveAll(Parameter.convert(request));
 
         return CreateServiceInstanceResponse.builder()

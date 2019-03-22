@@ -30,7 +30,7 @@ public class Binding {
     public Binding(CreateServiceInstanceBindingRequest request){
         setBindingId(request.getBindingId());
         setServiceInstanceId(request.getServiceInstanceId());
-        setApplicationId(request.getAppGuid());
+        setApplicationId(request.getBindResource().getAppGuid());
     }
 
     @Override

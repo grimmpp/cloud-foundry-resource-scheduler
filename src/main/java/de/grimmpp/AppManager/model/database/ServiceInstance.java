@@ -19,10 +19,13 @@ import javax.persistence.*;
 public class ServiceInstance {
 
     public ServiceInstance(CreateServiceInstanceRequest si) {
+        // Not yet supported
+        //setOrgId(si.getContext().getProperty("organization_guid").toString());
+        //setSpaceId(si.getContext().getProperty("space_guid").toString());
+        setSpaceId(si.getSpaceGuid());
         setOrgId(si.getOrganizationGuid());
         setServiceInstanceId(si.getServiceInstanceId());
         setServicePlanId(si.getPlanId());
-        setSpaceId(si.getSpaceGuid());
     }
 
     @Id
