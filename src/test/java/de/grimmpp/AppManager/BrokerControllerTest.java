@@ -77,7 +77,7 @@ public class BrokerControllerTest {
         cleanDatabase();
 
         String jsonRequest = CfApiMockController.getResourceContent("serviceInstanceProvisioningRequest_simple").replace("1w 3d 5m", "wrong time format");
-        CreateServiceInstanceRequest request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time": "1w 3d 5m"
+        CreateServiceInstanceRequest request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time;1w 3d 5m"
 
         boolean b = false;
         try {

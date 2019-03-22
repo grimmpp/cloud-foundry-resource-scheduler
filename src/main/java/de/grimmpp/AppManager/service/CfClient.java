@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.model.VcapApplication;
-import de.grimmpp.AppManager.model.cfClient.Resource;
-import de.grimmpp.AppManager.model.cfClient.Result;
-import de.grimmpp.AppManager.model.cfClient.ServiceInstance;
+import de.grimmpp.AppManager.model.cfClient.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,8 +12,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class CfClient {
     private ObjectMapper objectMapper = new ObjectMapper(){{
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }};
+    private OAuthExchange oAuthExchange = null;
 
     public static final String URL_PARAMETERS = "?order-direction=asc&results-per-page=100&page=%d";
 
@@ -37,6 +40,8 @@ public class CfClient {
     public static final String URI_APP_INSTANCE = "/v2/apps/%s/instances/%s";
     public static final String URI_APP_INSTANCES = "/v2/apps/%s/instances";
     public static final String URI_SINGLE_SPACE = "/v2/spaces/%s";
+    public static final String URI_OAUTH_TOKEN = "/oauth/token";
+    public static final String URI_API_INFO = "/v2/info";
 
 
     @Autowired
@@ -114,4 +119,24 @@ public class CfClient {
         return getResources(buildUrl(URI_ALL_SERVICE_INSTANCES_OF_A_PLAN, planId), ServiceInstance.class);
     }
 
+    public String getTokenEndpoint() throws IOException {
+        ApiInfo apiInfo = getObject(buildUrl(URI_API_INFO), ApiInfo.class);
+        String baseUrl = apiInfo.getToken_endpoint();
+        return baseUrl + URI_OAUTH_TOKEN;
+    }
+
+    public OAuthExchange getAccessToken() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("AUTHORIZATION", "Basic Y2Y6");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        UriComponents uri = UriComponentsBuilder.fromHttpUrl(getTokenEndpoint())
+                .queryParam("username", URLEncoder.encode("username", StandardCharsets.UTF_8.toString())) //TODO: enter user
+                .queryParam("password", URLEncoder.encode("password", StandardCharsets.UTF_8.toString())) //TODO: enter password
+                .queryParam("grant_type", "password")
+                .build(true);
+
+        ResponseEntity<OAuthExchange> resp = restTemplate.exchange(uri.toString(), HttpMethod.GET, entity, OAuthExchange.class);
+        return resp.getBody();
+    }
 }

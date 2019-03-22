@@ -107,7 +107,7 @@ public class TimeParameterValidatorTest {
     @Test
     public void defaultTimeTest() throws IOException {
         String jsonRequest = CfApiMockController.getResourceContent("serviceInstanceProvisioningRequest_simple");
-        CreateServiceInstanceRequest request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time": "1w 3d 5m"
+        CreateServiceInstanceRequest request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time;1w 3d 5m"
 
         String defaultTime = "8h";
 

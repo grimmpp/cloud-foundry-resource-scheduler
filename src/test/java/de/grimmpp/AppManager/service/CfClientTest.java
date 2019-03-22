@@ -1,4 +1,4 @@
-package de.grimmpp.AppManager;
+package de.grimmpp.AppManager.service;
 
 import de.grimmpp.AppManager.model.cfClient.*;
 import de.grimmpp.AppManager.service.CfClient;
@@ -67,5 +67,22 @@ public class CfClientTest {
         Resource<Application> app = cfClient.getResource(url, Application.class);
 
         Assert.assertEquals(appId, app.getMetadata().getGuid());
+    }
+
+    @Test
+    public void getApiInfo() throws IOException {
+        ApiInfo apiInfo = cfClient.getObject(cfClient.buildUrl(CfClient.URI_API_INFO), ApiInfo.class);
+        Assert.assertEquals("http://localhost:8111/cf_api_mock", apiInfo.getToken_endpoint());
+
+        String url = cfClient.getTokenEndpoint();
+        Assert.assertEquals("http://localhost:8111/cf_api_mock/oauth/token", url);
+    }
+
+    @Test
+    public void getAccessTokenTest() throws IOException {
+        OAuthExchange oauth = cfClient.getAccessToken();
+
+        Assert.assertTrue(oauth.getAccess_token().length() > 10);
+        Assert.assertTrue(oauth.getExpires_in() > 1000);
     }
 }

@@ -5,18 +5,19 @@
     "uptime": 2405
   },
   "1": {
-    "state": "RUNNING",
+    "state": "STARTING",
     "since": 3625363939.984577,
     "uptime": 1394
   },
   "2": {
-    "state": "RUNNING",
+    "details": "internal error",
+    "state": "CRASHED",
     "since": 2514251828.984577,
     "uptime": 283
   },
   "3": {
-    "state": "RUNNING",
-    "since": 2514251828.984577,
+    "details": "insufficient resources: disk",
+    "state": "DOWN",
     "uptime": 9172
   }
 }

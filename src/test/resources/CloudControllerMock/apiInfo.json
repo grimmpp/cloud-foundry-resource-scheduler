@@ -1,0 +1,19 @@
+{
+  "name": "",
+  "build": "",
+  "support": "",
+  "version": 0,
+  "description": "",
+  "authorization_endpoint": "http://localhost:8111/cf_api_mock",
+  "token_endpoint": "http://localhost:8111/cf_api_mock",
+  "min_cli_version": null,
+  "min_recommended_cli_version": null,
+  "app_ssh_endpoint": "localhost:8111",
+  "app_ssh_host_key_fingerprint": "a1:40:47:f6:cb:a2:33:88:81:cd:2e:6e:c5:0f:68:83",
+  "app_ssh_oauth_client": "ssh-proxy",
+  "doppler_logging_endpoint": "wss://http://localhost:8111",
+  "api_version": "2.131.0",
+  "osbapi_version": "2.14",
+  "routing_endpoint": "http://localhost:8111/cf_api_mock/routing",
+  "user": "afc1615d-1577-4ae8-acf4-7c7c5c83c592"
+}
