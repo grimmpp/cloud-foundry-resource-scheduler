@@ -1,5 +1,6 @@
 package de.grimmpp.AppManager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.controller.BrokerController;
 import de.grimmpp.AppManager.mocks.CfApiMockController;
 import de.grimmpp.AppManager.model.database.*;
@@ -69,6 +70,22 @@ public class BrokerControllerTest {
         Assert.assertEquals(siId, parameterList.get(0).getReference());
         Assert.assertEquals("time", parameterList.get(0).getKey());
         Assert.assertEquals(time, parameterList.get(0).getValue());
+    }
+
+    @Test
+    public void serviceInstanceProvisioningWrongTimeFormatTest() throws IOException {
+        cleanDatabase();
+
+        String jsonRequest = CfApiMockController.getResourceContent("serviceInstanceProvisioningRequest_simple").replace("1w 3d 5m", "wrong time format");
+        CreateServiceInstanceRequest request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time": "1w 3d 5m"
+
+        boolean b = false;
+        try {
+            brokerController.createServiceInstance(request);
+        } catch (Throwable e) {
+            b = true;
+        }
+        Assert.assertTrue(b);
     }
 
     @Test

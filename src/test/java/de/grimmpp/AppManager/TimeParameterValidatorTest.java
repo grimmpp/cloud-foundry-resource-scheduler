@@ -109,29 +109,29 @@ public class TimeParameterValidatorTest {
         String jsonRequest = CfApiMockController.getResourceContent("serviceInstanceProvisioningRequest_simple");
         CreateServiceInstanceRequest request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time": "1w 3d 5m"
 
-        String defaultTime = "8h ";
+        String defaultTime = "8h";
 
         // Take time from request
-        boolean b = TimeParameterValidator.containsTimeParameter(request);
+        boolean b = TimeParameterValidator.containsTimeParameter(request.getParameters());
         Assert.assertTrue(b);
-        b = TimeParameterValidator.validateParameterValue(request);
+        b = TimeParameterValidator.validateParameterValue(request.getParameters());
         Assert.assertTrue(b);
-        b = TimeParameterValidator.doesNotContainOrValidTimeParameter(request);
+        b = TimeParameterValidator.doesNotContainOrValidTimeParameter(request.getParameters());
         Assert.assertTrue(b);
-        long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(request, defaultTime);
+        long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(request.getParameters(), defaultTime);
         Assert.assertEquals(w + 3*d + 5*m, time);
         String parameterTime = TimeParameterValidator.getParameterTime(request, defaultTime);
-        Assert.assertEquals("1w 3d 5m ", parameterTime);
+        Assert.assertEquals("1w 3d 5m", parameterTime);
 
         // Take default time in none is in request
         request.getParameters().remove(TimeParameterValidator.KEY);
-        b = TimeParameterValidator.containsTimeParameter(request);
+        b = TimeParameterValidator.containsTimeParameter(request.getParameters());
         Assert.assertTrue(!b);
-        b = TimeParameterValidator.validateParameterValue(request);
+        b = TimeParameterValidator.validateParameterValue(request.getParameters());
         Assert.assertTrue(!b);
-        b = TimeParameterValidator.doesNotContainOrValidTimeParameter(request);
+        b = TimeParameterValidator.doesNotContainOrValidTimeParameter(request.getParameters());
         Assert.assertTrue(b);
-        time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(request, defaultTime);
+        time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(request.getParameters(), defaultTime);
         Assert.assertEquals(8*h, time);
         parameterTime = TimeParameterValidator.getParameterTime(request, defaultTime);
         Assert.assertEquals(defaultTime, parameterTime);
@@ -139,15 +139,15 @@ public class TimeParameterValidatorTest {
         // change to wrong format
         jsonRequest = jsonRequest.replace("\"time\": \"1w 3d 5m\"", "\"time\": \"a\"");
         request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class);
-        b = TimeParameterValidator.containsTimeParameter(request);
+        b = TimeParameterValidator.containsTimeParameter(request.getParameters());
         Assert.assertTrue(b);
-        b = TimeParameterValidator.validateParameterValue(request);
+        b = TimeParameterValidator.validateParameterValue(request.getParameters());
         Assert.assertTrue(!b);
-        b = TimeParameterValidator.doesNotContainOrValidTimeParameter(request);
+        b = TimeParameterValidator.doesNotContainOrValidTimeParameter(request.getParameters());
         Assert.assertTrue(!b);
         b = false;
         try {
-            TimeParameterValidator.getTimeInMilliSecFromParameterValue(request, defaultTime);
+            TimeParameterValidator.getTimeInMilliSecFromParameterValue(request.getParameters(), defaultTime);
         } catch (Throwable e) {
             b = true;
         }

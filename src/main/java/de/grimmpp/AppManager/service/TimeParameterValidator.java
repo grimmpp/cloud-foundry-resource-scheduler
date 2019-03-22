@@ -2,6 +2,7 @@ package de.grimmpp.AppManager.service;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 
 import java.util.Arrays;
@@ -16,28 +17,36 @@ public class TimeParameterValidator {
     public static final String KEY = "time";
     public static final String DEFAULT_VALUE = "8h";
 
-    public static final boolean doesNotContainOrValidTimeParameter(CreateServiceInstanceRequest request) {
-        return !containsTimeParameter(request) || validateParameterValue(request);
+    public static final boolean doesNotContainOrValidTimeParameter(Map<String,Object> map) {
+        return !containsTimeParameter(map) || validateParameterValue(map);
     }
 
-    public static final boolean containsTimeParameter(CreateServiceInstanceRequest request) {
-        return request.getParameters().containsKey(KEY);
+    public static final boolean containsTimeParameter(Map<String,Object> parameters) {
+        return parameters.containsKey(KEY);
     }
 
-    public static final boolean validateParameterValue(CreateServiceInstanceRequest request) {
-        if (!containsTimeParameter(request)) return  false;
-        return validateParameterValue(request.getParameters().get(KEY).toString());
+    public static final boolean validateParameterValue(Map<String,Object> parameters) {
+        if (!containsTimeParameter(parameters)) return  false;
+        return validateParameterValue(parameters.get(KEY).toString());
+    }
+
+    public static final String getParameterTime(Map<String,Object> parameters, String defaultTime) {
+        if (!containsTimeParameter(parameters)) return defaultTime;
+        if (!validateParameterValue(parameters)) throw new RuntimeException();
+        return formattingAndCleaning(parameters.get(KEY).toString());
     }
 
     public static final String getParameterTime(CreateServiceInstanceRequest request, String defaultTime) {
-        if (!containsTimeParameter(request)) return defaultTime;
-        if (!validateParameterValue(request)) throw new RuntimeException();
-        return formattingAndCleaning(request.getParameters().get(KEY).toString());
+        return getParameterTime(request.getParameters(), defaultTime);
     }
 
-    public static final long getTimeInMilliSecFromParameterValue(CreateServiceInstanceRequest request, String defaultTime) {
+    public static final String getParameterTime(CreateServiceInstanceBindingRequest request, String defaultTime) {
+        return getParameterTime(request.getParameters(), defaultTime);
+    }
+
+    public static final long getTimeInMilliSecFromParameterValue(Map<String,Object> parameters, String defaultTime) {
         String time = defaultTime;
-        if (containsTimeParameter(request)) time = request.getParameters().get(KEY).toString();
+        if (containsTimeParameter(parameters)) time = parameters.get(KEY).toString();
         return getTimeInMilliSecFromParameterValue(time);
     }
 
@@ -82,7 +91,7 @@ public class TimeParameterValidator {
         value = value.replaceAll("s", "s ");
         while(value.contains("  ")) value = value.replaceAll("  ", " ");
 
-        return value;
+        return value.trim();
     }
 
     private static long getTimeSection(String timeSection) {

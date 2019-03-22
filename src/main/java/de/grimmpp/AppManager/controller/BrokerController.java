@@ -58,8 +58,13 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
         logRequest(request);
 
         siRepo.save(new ServiceInstance(request));
-        long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(request, TimeParameterValidator.DEFAULT_VALUE);
-        paraRepo.saveAll(Parameter.convert(request));
+        String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
+        paraRepo.save(
+                Parameter.builder()
+                    .reference(request.getServiceInstanceId())
+                    .key(TimeParameterValidator.KEY)
+                    .value(time)
+                    .build());
 
         return CreateServiceInstanceResponse.builder()
                 .async(false)
@@ -106,8 +111,13 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
     public CreateServiceInstanceBindingResponse createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
         logRequest(request);
 
-        String time = "8d";
-        if (request.getParameters().containsKey("time")) time = request.getParameters().get("time").toString();
+        String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
+        paraRepo.save(
+                Parameter.builder()
+                        .reference(request.getServiceInstanceId())
+                        .key(TimeParameterValidator.KEY)
+                        .value(time)
+                        .build());
 
         Binding sb = new Binding(request);
         bindingRepo.save(sb);
