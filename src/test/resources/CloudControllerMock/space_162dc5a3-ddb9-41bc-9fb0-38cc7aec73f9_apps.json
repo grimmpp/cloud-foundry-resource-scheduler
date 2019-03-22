@@ -23,7 +23,7 @@
         "memory": 1024,
         "instances": 1,
         "disk_quota": 1024,
-        "state": "STOPPED",
+        "state": "STARTED",
         "version": "df19a7ea-2003-4ecb-a909-e630e43f2719",
         "command": null,
         "console": false,
