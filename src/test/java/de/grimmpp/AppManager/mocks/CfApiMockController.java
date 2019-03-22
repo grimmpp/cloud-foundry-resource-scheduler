@@ -91,6 +91,9 @@ public class CfApiMockController {
         if (resources.equals("apps")) {
             respBody = getResourceContent("app_"+id);
         }
+        else if (resources.equals("spaces")) {
+            respBody = getResourceContent("space_"+id);
+        }
 
         insertLastOperation("/v2/"+resources+"/"+id, "GET", "", respBody);
 

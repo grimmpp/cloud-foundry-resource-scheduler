@@ -2,6 +2,7 @@ package de.grimmpp.AppManager.service;
 
 import de.grimmpp.AppManager.model.cfClient.Application;
 import de.grimmpp.AppManager.model.cfClient.Resource;
+import de.grimmpp.AppManager.model.cfClient.Space;
 import de.grimmpp.AppManager.model.database.Parameter;
 import de.grimmpp.AppManager.model.database.ServiceInstance;
 import lombok.extern.slf4j.Slf4j;
@@ -19,32 +20,41 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
     @Override
     protected void performActionForServiceInstance(ServiceInstance si) throws IOException {
 
-        String url = cfClient.buildUrl(CfClient.URI_APPS_OF_SPACE, si.getSpaceId());
-        List<Resource<Application>> apps = cfClient.getResources(url, Application.class);
-        log.debug("Collected {} apps from space: {}", apps.size(), PLAN_ID);
+        String spaceUrl = cfClient.buildUrl(CfClient.URI_SINGLE_SPACE, si.getSpaceId());
+        Resource<Space> space = cfClient.getResource(spaceUrl, Space.class);
 
-        for (Resource<Application> app : apps) {
+        if (!space.getEntity().getName().toLowerCase().contains("prod")) {
 
-            long currentTime = System.currentTimeMillis();
-            if (app.getEntity().getState().equals("STARTED")) {
-                String logLine = String.format("app: %s, space: %s because of serviceInstance: %s",
-                        app.getMetadata().getGuid(), si.getSpaceId(), si.getServiceInstanceId());
+            String url = cfClient.buildUrl(CfClient.URI_APPS_OF_SPACE, si.getSpaceId());
+            List<Resource<Application>> apps = cfClient.getResources(url, Application.class);
+            log.debug("Collected {} apps from space: {}", apps.size(), PLAN_ID);
 
-                Parameter p = pRepo.findByReferenceAndKey(si.getServiceInstanceId(), TimeParameterValidator.KEY);
-                long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(p.getValue());
+            for (Resource<Application> app : apps) {
 
-                long timeDiff = currentTime - app.getMetadata().getUpdated_at().getTime();
-                if (timeDiff > time) {
-                    try {
-                        String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, app.getMetadata().getGuid());
-                        cfClient.updateResource(appUrl, "{\"state\": \"STOPPED\"}", String.class);
+                long currentTime = System.currentTimeMillis();
+                if (app.getEntity().getState().equals("STARTED")) {
+                    String logLine = String.format("app: %s, space: %s because of serviceInstance: %s",
+                            app.getMetadata().getGuid(), si.getSpaceId(), si.getServiceInstanceId());
 
-                        log.info("Stopped ");
-                    } catch (Throwable e) {
-                        log.error("Cannot stop " + logLine, e);
+                    Parameter p = pRepo.findByReferenceAndKey(si.getServiceInstanceId(), TimeParameterValidator.KEY);
+                    long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(p.getValue());
+
+                    long timeDiff = currentTime - app.getMetadata().getUpdated_at().getTime();
+                    if (timeDiff > time) {
+                        try {
+                            String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, app.getMetadata().getGuid());
+                            cfClient.updateResource(appUrl, "{\"state\": \"STOPPED\"}", String.class);
+
+                            log.info("Stopped ");
+                        } catch (Throwable e) {
+                            log.error("Cannot stop " + logLine, e);
+                        }
                     }
                 }
             }
+        } else {
+            log.debug("Cancelled space {} consideration because it contains 'prod' in its name: {}",
+                    space.getMetadata().getGuid(), space.getEntity().getName());
         }
     }
 

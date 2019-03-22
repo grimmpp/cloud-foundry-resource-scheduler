@@ -36,6 +36,7 @@ public class CfClient {
     public static final String URI_APPS_OF_SPACE = "/v2/spaces/%s/apps";
     public static final String URI_APP_INSTANCE = "/v2/apps/%s/instances/%s";
     public static final String URI_APP_INSTANCES = "/v2/apps/%s/instances";
+    public static final String URI_SINGLE_SPACE = "/v2/spaces/%s";
 
 
     @Autowired

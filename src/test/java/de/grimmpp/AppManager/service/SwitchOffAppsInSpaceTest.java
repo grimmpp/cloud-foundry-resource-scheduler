@@ -14,10 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -35,6 +33,7 @@ public class SwitchOffAppsInSpaceTest {
 
     private String siid = UUID.randomUUID().toString();
     private String spaceId = "162dc5a3-ddb9-41bc-9fb0-38cc7aec73f9";
+    private String productionSpaceId = "bc8d3381-390d-4bd7-8c71-25309900a2e3";
 
     @Test
     public void stopAllAppsTest() throws IOException {
@@ -83,6 +82,29 @@ public class SwitchOffAppsInSpaceTest {
         Assert.assertEquals(RequestMethod.GET.toString(), httpMethod);
 
         String url = "/v2/spaces/162dc5a3-ddb9-41bc-9fb0-38cc7aec73f9/apps";
+        Assert.assertEquals(url, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
+
+        String requestBody = "";
+        Assert.assertEquals(requestBody, cfApiMockController.getLastOperation(CfApiMockController.KEY_REQUEST_BODY));
+    }
+
+    @Test
+    public void productionSpaceNameTest() throws IOException, ParseException {
+        ServiceInstance si = ServiceInstance.builder()
+                .serviceInstanceId(siid)
+                .spaceId(productionSpaceId)
+                .build();
+
+        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY, "5m"));
+
+        // execute logic to test
+        servicePlan.performActionForServiceInstance(si);
+
+        // Check last call which stopped the app
+        String httpMethod = cfApiMockController.getLastOperation(CfApiMockController.KEY_HTTP_METHOD);
+        Assert.assertEquals(RequestMethod.GET.toString(), httpMethod);
+
+        String url = "/v2/spaces/bc8d3381-390d-4bd7-8c71-25309900a2e3";
         Assert.assertEquals(url, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
 
         String requestBody = "";
