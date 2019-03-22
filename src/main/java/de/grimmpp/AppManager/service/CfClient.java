@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.model.VcapApplication;
 import de.grimmpp.AppManager.model.cfClient.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -28,7 +25,7 @@ public class CfClient {
     private ObjectMapper objectMapper = new ObjectMapper(){{
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }};
-    private OAuthExchange oAuthExchange = null;
+    private OAuthExchange oAuthExchange = OAuthExchange.builder().access_token("token").build();
 
     public static final String URL_PARAMETERS = "?order-direction=asc&results-per-page=100&page=%d";
 
@@ -47,11 +44,21 @@ public class CfClient {
     @Autowired
     private VcapApplication vcapApp;
 
+
+    private HttpHeaders getHttpHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(oAuthExchange.getAccess_token());
+        return headers;
+    }
+
+
     public <Entity> List<Resource<Entity>> getResources(String absoluteUrl, Class<Entity> entityType) throws IOException {
         List<Resource<Entity>> resources = new ArrayList<>();
 
         while (absoluteUrl != null) {
-            ResponseEntity<String> resp = restTemplate.getForEntity(absoluteUrl, String.class);
+
+            ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.GET, new HttpEntity<>(getHttpHeaders()), String.class);
 
             Result<Entity> result = castRESTResources(resp.getBody(), entityType);
             resources.addAll(result.getResources());
@@ -63,18 +70,14 @@ public class CfClient {
     }
 
     public void deleteResource(String absoluteUrl) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        HttpEntity<String> request = new HttpEntity<>("", headers);
+        HttpEntity<String> request = new HttpEntity<>(getHttpHeaders());
         ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.DELETE, request, String.class);
     }
 
     public <Entity> Entity updateResource(String absoluteUrl, Object payload, Class<Entity> entityType) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
         String body = objectMapper.writeValueAsString(payload);
 
-        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        HttpEntity<String> request = new HttpEntity<>(body, getHttpHeaders());
         ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.PUT, request, String.class);
 
         if (resp.getBody() == null) return null;
@@ -84,14 +87,16 @@ public class CfClient {
     public <Entity> Resource<Entity> getResource(String absoluteUrl, Class<Entity> entityType) throws IOException {
         Resource<Entity> result = null;
 
-        ResponseEntity<String> resp = restTemplate.getForEntity(absoluteUrl, String.class);
+        HttpEntity<String> request = new HttpEntity<>(getHttpHeaders());
+        ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.GET, request, String.class);
         result = castRESTResource(resp.getBody(), entityType);
 
         return result;
     }
 
     public <Entity> Entity getObject(String absoluteUrl, Class<Entity> entityType) throws IOException {
-        ResponseEntity<String> resp = restTemplate.getForEntity(absoluteUrl, String.class);
+        HttpEntity<String> request = new HttpEntity<>(getHttpHeaders());
+        ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.GET, request, String.class);
 
         return objectMapper.readValue(resp.getBody(), entityType);
     }
@@ -120,7 +125,7 @@ public class CfClient {
     }
 
     public String getTokenEndpoint() throws IOException {
-        ApiInfo apiInfo = getObject(buildUrl(URI_API_INFO), ApiInfo.class);
+        ApiInfo apiInfo = restTemplate.getForEntity(buildUrl(URI_API_INFO), ApiInfo.class).getBody();
         String baseUrl = apiInfo.getToken_endpoint();
         return baseUrl + URI_OAUTH_TOKEN;
     }
