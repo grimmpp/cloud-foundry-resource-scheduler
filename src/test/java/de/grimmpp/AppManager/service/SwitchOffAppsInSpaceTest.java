@@ -1,7 +1,6 @@
-package de.grimmpp.AppManager.serviceplans;
+package de.grimmpp.AppManager.service;
 
 import de.grimmpp.AppManager.mocks.CfApiMockController;
-import de.grimmpp.AppManager.service.ServicePlanSwitchOffAppsInSpace;
 import de.grimmpp.AppManager.AppManagerApplication;
 import org.junit.Assert;
 import org.junit.Test;

@@ -15,7 +15,7 @@ public class Application {
     private String buildpack;
     private String detected_buildpack;
     private String detected_buildpack_guid;
-    private String environment_json;
+    private Map<String,Object> environment_json;
     private Integer memory;
     private Integer instances;
     private Integer disk_quota;

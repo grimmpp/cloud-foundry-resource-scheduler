@@ -104,7 +104,7 @@ public class CfClient {
 
     public String buildUrl(String resorucePath, String... args) {
         String url = vcapApp.getCf_api() + resorucePath + String.format(URL_PARAMETERS, 1);
-        for(String arg: args) url = String.format(url, arg);
+        url = String.format(url, args);
 
         return url;
     }

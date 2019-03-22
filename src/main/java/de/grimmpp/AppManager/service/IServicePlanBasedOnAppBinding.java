@@ -1,51 +1,35 @@
 package de.grimmpp.AppManager.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.model.cfClient.Application;
 import de.grimmpp.AppManager.model.cfClient.ApplicationInstances;
 import de.grimmpp.AppManager.model.cfClient.Resource;
 import de.grimmpp.AppManager.model.database.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public abstract class IServicePlanBasedOnAppBinding extends IServicePlanBasedOnServiceInstance {
 
-    protected abstract BindingRepository bRepo();
-    protected abstract ParameterRepository pRepo();
-    protected abstract void performAction(String instanceId, String spaceId, String orgId);
+    protected abstract void performActionForBinding(ServiceInstance si, Binding b, Resource<Application> app, Long time) throws IOException;
 
     @Override
-    public void run() throws IOException {
-        String planId = getServicePlanId();
+    public void performActionForServiceInstance(ServiceInstance si) throws IOException {
 
-        for(ServiceInstance si: siRepo().findByServicePlanId(planId)) {
-            for(Binding b: bRepo().findByServiceInstanceId(si.getServiceInstanceId())) {
-                String appUrl = cfClient().buildUrl(CfClient.URI_SINGLE_APP, b.getApplicationId());
-                Resource<Application> app = cfClient().getResource(appUrl, Application.class);
+        for(Binding b: bRepo.findByServiceInstanceId(si.getServiceInstanceId())) {
+            log.debug("Check Binding: {}, Apps: {}", b.getBindingId(), b.getApplicationId());
 
-                Parameter p = pRepo().findByReferenceAndKey(b.getServiceInstanceId(), "time");
-                long time = 0; //TODO: to be set with value from parameter
+            String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, b.getApplicationId());
+            Resource<Application> app = cfClient.getResource(appUrl, Application.class);
+            log.trace("App data: {}", new ObjectMapper().writeValueAsString(app));
 
-                if (app.getEntity().getState().equals("STARTED")) {
+            Parameter p = pRepo.findByReferenceAndKey(b.getServiceInstanceId(), "time");
+            long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(p.getValue());
+            log.debug("Time: parameter value: {}, milli sec: {}", p.getValue(), time);
 
-                    String aiUrl = cfClient().buildUrl(CfClient.URI_APP_INSTANCES, b.getApplicationId());
-                    ApplicationInstances ais = cfClient().getObject(aiUrl, ApplicationInstances.class);
-
-                    boolean isAppExpired = ais.values().stream().anyMatch(i -> i.getUptime().equals(time));
-
-                    if (isAppExpired) {
-                        for (int i = 0; i < app.getEntity().getInstances(); i++) {
-                            String instanceUrl = cfClient().buildUrl(CfClient.URI_APP_INSTANCE, b.getApplicationId(), String.valueOf(i));
-                            cfClient().deleteResource(instanceUrl);
-                        }
-                    }
-                }
-            }
+            performActionForBinding(si, b, app, time);
         }
 
-        for(ServiceInstance si: siRepo().findByServicePlanId(planId)) {
-
-
-            performAction(si.getServiceInstanceId(), si.getSpaceId(), si.getOrgId());
-        }
     }
 }

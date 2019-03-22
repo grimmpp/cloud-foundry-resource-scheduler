@@ -20,7 +20,7 @@ public class CfApiMockController {
     public static final String KEY_REQUEST_BODY = "ReqBody";
     public static final String KEY_RESPONSE_BODY = "RespBody";
     public static final String KEY_HTTP_METHOD = "HttpMethod";
-    private final List<Map<String, String>> lastOperations = new ArrayList<>();
+    public final List<Map<String, String>> lastOperations = new ArrayList<>();
 
     public String getLastOperation(String key) {
         return lastOperations.get(0).get(key);
@@ -56,10 +56,27 @@ public class CfApiMockController {
         else if (resources.equals("spaces") && dependentResources.equals("apps")) {
             respBody = getResourceContent("space_"+id+"_apps");
         }
+        else if (resources.equals("apps") && dependentResources.equals("instances")) {
+            respBody = getResourceContent("ais_"+id);
+        }
 
         insertLastOperation("/v2/"+resources+"/"+id+"/"+dependentResources, "GET", "", respBody);
 
         return respBody;
+    }
+
+    @RequestMapping(value = "/cf_api_mock/v2/{resources}/{id}/{dependentResources}/{drid}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public String delete(
+            @PathVariable("resources") String resources,
+            @PathVariable("id") String id,
+            @PathVariable("dependentResources") String dependentResources,
+            @PathVariable("drid") String dependentResourceId)
+            throws IOException {
+
+        insertLastOperation("/v2/"+resources+"/"+id+"/"+dependentResources+"/"+dependentResourceId, "DELETE", "", "");
+
+        return "";
     }
 
     @RequestMapping("/cf_api_mock/v2/{resources}/{id}")
