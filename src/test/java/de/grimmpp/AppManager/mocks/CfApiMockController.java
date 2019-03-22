@@ -1,5 +1,6 @@
 package de.grimmpp.AppManager.mocks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
@@ -120,5 +121,10 @@ public class CfApiMockController {
         String content = new String(Files.readAllBytes(file.toPath()));
 
         return content;
+    }
+
+    public static <ReturnType> ReturnType getResourceContent(String resourceName, Class<ReturnType> returnType) throws IOException {
+        String content = getResourceContent(resourceName);
+        return (ReturnType) new ObjectMapper().readValue(content, returnType);
     }
 }

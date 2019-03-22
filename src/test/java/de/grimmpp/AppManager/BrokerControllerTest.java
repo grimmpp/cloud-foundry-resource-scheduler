@@ -1,13 +1,13 @@
 package de.grimmpp.AppManager;
 
 import de.grimmpp.AppManager.controller.BrokerController;
+import de.grimmpp.AppManager.mocks.CfApiMockController;
 import de.grimmpp.AppManager.model.database.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.servicebroker.model.binding.BindResource;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.binding.DeleteServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
@@ -16,9 +16,9 @@ import org.springframework.cloud.servicebroker.model.instance.DeleteServiceInsta
 import org.springframework.cloud.servicebroker.model.instance.UpdateServiceInstanceRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { AppManagerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -37,25 +37,22 @@ public class BrokerControllerTest {
     private BrokerController brokerController;
 
 
-    private String siId = UUID.randomUUID().toString();
-    private String bId = UUID.randomUUID().toString();
-    private String appId = UUID.randomUUID().toString();
-    private String planId = UUID.randomUUID().toString();
-    private String orgId = UUID.randomUUID().toString();
-    private String spaceId = UUID.randomUUID().toString();
+    private String siId = "8b07d88e-ac43-4a3a-93dc-cf54b389a541";
+    private String bId = "b9e2d70e-80b7-4784-8e67-0a4b0bccbb87";
+    private String appId = "ae93a4ec-42c2-4087-b4f6-03d79c6aa822";
+    private String planId = "4e1020f9-6577-4ba3-885f-95bb978b4939";
+    private String orgId = "701e1662-9fc4-4842-a798-1c9992e435c9";
+    private String spaceId = "359b04a4-1006-4c57-b14d-9dfec46f8e78";
     private String time = "1w 3d 5m";
 
 
     @Test
-    public void serviceInstanceProvisioningTest() {
+    public void serviceInstanceProvisioningTest() throws IOException {
         cleanDatabase();
 
-        CreateServiceInstanceRequest request = CreateServiceInstanceRequest
-                .builder()
-                .planId(planId)
-                .serviceInstanceId(siId)
-                .parameters("time", time)
-                .build();
+        CreateServiceInstanceRequest request = CfApiMockController.getResourceContent(
+                "serviceInstanceProvisioningRequest_simple",
+                CreateServiceInstanceRequest.class);
 
         CreateServiceInstanceResponse response = brokerController.createServiceInstance(request);
         Assert.assertNotNull(response);
@@ -64,6 +61,8 @@ public class BrokerControllerTest {
         Assert.assertNotNull(si);
         Assert.assertEquals(siId, si.getServiceInstanceId());
         Assert.assertEquals(planId, si.getServicePlanId());
+        Assert.assertEquals(orgId, si.getOrgId());
+        Assert.assertEquals(spaceId, si.getSpaceId());
 
         List<Parameter> parameterList = parameterRepository.findByReference(siId);
         Assert.assertEquals(1, parameterList.size());
@@ -73,17 +72,12 @@ public class BrokerControllerTest {
     }
 
     @Test
-    public void bindingProvisioningTest() {
+    public void bindingProvisioningTest() throws IOException {
         serviceInstanceProvisioningTest();
 
-        CreateServiceInstanceBindingRequest request = CreateServiceInstanceBindingRequest.builder()
-                .bindingId(bId)
-                .serviceInstanceId(siId)
-                .bindResource(BindResource.builder()
-                        .appGuid(appId)
-                        .build())
-                .parameters("time", time)
-                .build();
+        CreateServiceInstanceBindingRequest request = CfApiMockController.getResourceContent(
+                "bindingRequest_simple",
+                CreateServiceInstanceBindingRequest.class);
 
         brokerController.createServiceInstanceBinding(request);
 
@@ -101,7 +95,7 @@ public class BrokerControllerTest {
     }
 
     @Test
-    public void bindingDeprovisioningTest() {
+    public void bindingDeprovisioningTest() throws IOException {
         bindingProvisioningTest();
 
         DeleteServiceInstanceBindingRequest request = DeleteServiceInstanceBindingRequest.builder()
@@ -124,7 +118,7 @@ public class BrokerControllerTest {
     }
 
     @Test
-    public void serviceInstanceDeleteTest() {
+    public void serviceInstanceDeleteTest() throws IOException {
         bindingDeprovisioningTest();
 
         DeleteServiceInstanceRequest request = DeleteServiceInstanceRequest.builder()
@@ -142,7 +136,7 @@ public class BrokerControllerTest {
     }
 
     @Test
-    public void updateServiceInstanceTest(){
+    public void updateServiceInstanceTest() throws IOException {
         serviceInstanceProvisioningTest();
 
         String newTime = "3d 5m";
