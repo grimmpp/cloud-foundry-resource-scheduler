@@ -69,7 +69,7 @@ public class CfClient {
     public CfClient() { }
 
     @PostConstruct
-    public void initialize() throws KeyManagementException, NoSuchAlgorithmException, IOException, KeyStoreException {
+    public void initialize() throws KeyManagementException, NoSuchAlgorithmException {
         log.debug("initialize cfClient");
         if (enableSslValidation) {
             log.debug("Enable SSL!");
@@ -85,7 +85,7 @@ public class CfClient {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    private RestTemplate getRestTemplate() throws IOException {
+    private RestTemplate getRestTemplate() {
 
         if (restTemplate == null) {
             log.debug("Get Token Endpoint: ");
@@ -138,7 +138,7 @@ public class CfClient {
         return resources;
     }
 
-    public void deleteResource(String absoluteUrl) throws IOException {
+    public void deleteResource(String absoluteUrl) {
         HttpEntity<String> request = new HttpEntity<>(getHttpHeaders());
         ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.DELETE, request, String.class);
     }
@@ -197,7 +197,7 @@ public class CfClient {
         return getResources(buildUrl(URI_ALL_SERVICE_INSTANCES_OF_A_PLAN, planId), ServiceInstance.class);
     }
 
-    public String getTokenEndpoint() throws IOException {
+    public String getTokenEndpoint() {
         ApiInfo apiInfo = new RestTemplate().getForEntity(buildUrl(URI_API_INFO), ApiInfo.class).getBody();
         String baseUrl = apiInfo.getToken_endpoint();
         return baseUrl + URI_OAUTH_TOKEN;
