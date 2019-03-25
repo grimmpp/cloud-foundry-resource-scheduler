@@ -27,7 +27,7 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
         if (app.getEntity().getState().equals("STARTED")) {
             log.debug("App {} is in state: STARTED", b.getApplicationId());
 
-            String aiUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCES, b.getApplicationId());
+            String aiUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCES, false, b.getApplicationId());
             ApplicationInstances ais = cfClient.getObject(aiUrl, ApplicationInstances.class);
             log.trace("App Instances: {}", new ObjectMapper().writeValueAsString(ais));
 
@@ -41,7 +41,7 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
                             i, b.getApplicationId(), si.getSpaceId(), si.getOrgId(), si.getServiceInstanceId(), PLAN_ID);
 
                     try {
-                        String instanceUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCE, b.getApplicationId(), String.valueOf(i));
+                        String instanceUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCE, false, b.getApplicationId(), String.valueOf(i));
                         cfClient.deleteResource(instanceUrl);
 
                         log.info("Restarted "+logLine);

@@ -3,29 +3,39 @@ package de.grimmpp.AppManager.service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.config.SSLUtil;
 import de.grimmpp.AppManager.model.VcapApplication;
 import de.grimmpp.AppManager.model.cfClient.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.AccessTokenRequest;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class CfClient {
 
-    private RestTemplate restTemplate = new RestTemplate();
-    private ObjectMapper objectMapper = new ObjectMapper(){{
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }};
-    private OAuthExchange oAuthExchange = OAuthExchange.builder().access_token("token").build();
+    private RestTemplate restTemplate = null;
+    private ObjectMapper objectMapper = null;
 
     public static final String URL_PARAMETERS = "?order-direction=asc&results-per-page=100&page=%d";
 
@@ -40,15 +50,74 @@ public class CfClient {
     public static final String URI_OAUTH_TOKEN = "/oauth/token";
     public static final String URI_API_INFO = "/v2/info";
 
-
     @Autowired
     private VcapApplication vcapApp;
 
+    @Value("${cfClient.SSL-Validation-enabled}")
+    private Boolean enableSslValidation;
+
+    @Value("${cfClient.oauth-enabled}")
+    private Boolean oauthEnabled;
+
+    @Value("${cfClient.cfApi.username}")
+    private String cfApiUsername;
+
+    @Value("${cfClient.cfApi.password}")
+    private String cfApiPassword;
+
+
+    public CfClient() { }
+
+    @PostConstruct
+    public void initialize() throws KeyManagementException, NoSuchAlgorithmException, IOException, KeyStoreException {
+        log.debug("initialize cfClient");
+        if (enableSslValidation) {
+            log.debug("Enable SSL!");
+            SSLUtil.turnOnSslChecking();
+        }
+        else {
+            log.info("Disable SSL!");
+            SSLUtil.turnOffSslChecking();
+        }
+
+        log.debug("Create ObjectMapper");
+        objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+    private RestTemplate getRestTemplate() throws IOException {
+
+        if (restTemplate == null) {
+            log.debug("Get Token Endpoint: ");
+            String tokenEndpoint = getTokenEndpoint();
+            log.debug(tokenEndpoint);
+
+            if (!oauthEnabled) {
+                log.debug("Create RestTemplate without OAuth2");
+                restTemplate = new RestTemplate();
+
+            } else {
+                log.debug("Create OAuth2RestTemplate");
+
+                ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
+                resource.setAccessTokenUri(tokenEndpoint);
+                resource.setClientId("cf");
+                resource.setClientSecret("");
+                resource.setGrantType("password");
+                resource.setUsername(cfApiUsername);
+                resource.setPassword(cfApiPassword);
+
+                AccessTokenRequest atr = new DefaultAccessTokenRequest();
+                restTemplate = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(atr));
+            }
+        }
+
+        return restTemplate;
+    }
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(oAuthExchange.getAccess_token());
         return headers;
     }
 
@@ -58,7 +127,7 @@ public class CfClient {
 
         while (absoluteUrl != null) {
 
-            ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.GET, new HttpEntity<>(getHttpHeaders()), String.class);
+            ResponseEntity<String> resp = getRestTemplate().exchange(absoluteUrl, HttpMethod.GET, new HttpEntity<>(getHttpHeaders()), String.class);
 
             Result<Entity> result = castRESTResources(resp.getBody(), entityType);
             resources.addAll(result.getResources());
@@ -78,7 +147,7 @@ public class CfClient {
         String body = objectMapper.writeValueAsString(payload);
 
         HttpEntity<String> request = new HttpEntity<>(body, getHttpHeaders());
-        ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.PUT, request, String.class);
+        ResponseEntity<String> resp = getRestTemplate().exchange(absoluteUrl, HttpMethod.PUT, request, String.class);
 
         if (resp.getBody() == null) return null;
         return objectMapper.readValue(resp.getBody(), entityType);
@@ -88,7 +157,7 @@ public class CfClient {
         Resource<Entity> result = null;
 
         HttpEntity<String> request = new HttpEntity<>(getHttpHeaders());
-        ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.GET, request, String.class);
+        ResponseEntity<String> resp = getRestTemplate().exchange(absoluteUrl, HttpMethod.GET, request, String.class);
         result = castRESTResource(resp.getBody(), entityType);
 
         return result;
@@ -96,7 +165,7 @@ public class CfClient {
 
     public <Entity> Entity getObject(String absoluteUrl, Class<Entity> entityType) throws IOException {
         HttpEntity<String> request = new HttpEntity<>(getHttpHeaders());
-        ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.GET, request, String.class);
+        ResponseEntity<String> resp = getRestTemplate().exchange(absoluteUrl, HttpMethod.GET, request, String.class);
 
         return objectMapper.readValue(resp.getBody(), entityType);
     }
@@ -114,9 +183,13 @@ public class CfClient {
     }
 
     public String buildUrl(String resorucePath, String... args) {
-        String url = vcapApp.getCf_api() + resorucePath + String.format(URL_PARAMETERS, 1);
-        url = String.format(url, args);
+        return buildUrl(resorucePath, true, args);
+    }
 
+    public String buildUrl(String resorucePath, boolean enablePaging, String... args) {
+        String url = vcapApp.getCf_api() + resorucePath;
+        url = String.format(url, args);
+        if (enablePaging) url += String.format(URL_PARAMETERS, 1);
         return url;
     }
 
@@ -125,23 +198,8 @@ public class CfClient {
     }
 
     public String getTokenEndpoint() throws IOException {
-        ApiInfo apiInfo = restTemplate.getForEntity(buildUrl(URI_API_INFO), ApiInfo.class).getBody();
+        ApiInfo apiInfo = new RestTemplate().getForEntity(buildUrl(URI_API_INFO), ApiInfo.class).getBody();
         String baseUrl = apiInfo.getToken_endpoint();
         return baseUrl + URI_OAUTH_TOKEN;
-    }
-
-    public OAuthExchange getAccessToken() throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("AUTHORIZATION", "Basic Y2Y6");
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        UriComponents uri = UriComponentsBuilder.fromHttpUrl(getTokenEndpoint())
-                .queryParam("username", URLEncoder.encode("username", StandardCharsets.UTF_8.toString())) //TODO: enter user
-                .queryParam("password", URLEncoder.encode("password", StandardCharsets.UTF_8.toString())) //TODO: enter password
-                .queryParam("grant_type", "password")
-                .build(true);
-
-        ResponseEntity<OAuthExchange> resp = restTemplate.exchange(uri.toString(), HttpMethod.GET, entity, OAuthExchange.class);
-        return resp.getBody();
     }
 }

@@ -2,8 +2,6 @@ package de.grimmpp.AppManager.mocks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.model.VcapApplication;
-import de.grimmpp.AppManager.model.cfClient.ApiInfo;
-import de.grimmpp.AppManager.model.cfClient.OAuthExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ResourceUtils;
@@ -47,11 +45,8 @@ public class CfApiMockController {
 
     @RequestMapping("/cf_api_mock/oauth/token")
     @ResponseBody
-    public OAuthExchange getMockToken() {
-        return OAuthExchange.builder()
-                .expires_in(1000*60*60*24)
-                .access_token(UUID.randomUUID().toString())
-                .build();
+    public String getMockToken() throws IOException {
+        return getResourceContent("oauthToken");
     }
 
     @RequestMapping("/cf_api_mock/v2/{resources}/{id}/{dependentResources}")

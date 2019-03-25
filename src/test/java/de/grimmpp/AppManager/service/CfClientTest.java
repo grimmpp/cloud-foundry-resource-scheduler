@@ -1,5 +1,7 @@
 package de.grimmpp.AppManager.service;
 
+import de.grimmpp.AppManager.config.SSLUtil;
+import de.grimmpp.AppManager.model.VcapApplication;
 import de.grimmpp.AppManager.model.cfClient.*;
 import de.grimmpp.AppManager.service.CfClient;
 import de.grimmpp.AppManager.AppManagerApplication;
@@ -9,10 +11,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -20,7 +28,26 @@ import java.util.List;
 public class CfClientTest {
 
     @Autowired
+    private VcapApplication vcapApp;
+
+    @Autowired
     CfClient cfClient;
+
+    @Value("${cfClient.SSL-Validation-enabled}")
+    private Boolean enableSslValidation;
+
+    @Value("${cfClient.oauth-enabled}")
+    private Boolean oauthEnabled;
+
+    @Test
+    public void isSslValidationDisabledForTest(){
+        Assert.assertTrue(!enableSslValidation);
+    }
+
+    @Test
+    public void isOauthDisabledForTesting() {
+        Assert.assertTrue(!oauthEnabled);
+    }
 
     @Test
     public void convertJsonTest() throws IOException {
@@ -78,11 +105,19 @@ public class CfClientTest {
         Assert.assertEquals("http://localhost:8111/cf_api_mock/oauth/token", url);
     }
 
+/*
     @Test
-    public void getAccessTokenTest() throws IOException {
-        OAuthExchange oauth = cfClient.getAccessToken();
+    public void authorizationTest() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        //vcapApp.setCf_api("https://api.dev.cfdev.sh");
+        // "https://uaa.dev.cfdev.sh/oauth/token"
 
-        Assert.assertTrue(oauth.getAccess_token().length() > 10);
-        Assert.assertTrue(oauth.getExpires_in() > 1000);
-    }
+        //OAuthExchange oauth = cfClient.getAccessToken("https://uaa.dev.cfdev.sh");
+
+        ResponseEntity<ApiInfo> apiInfo = new RestTemplate(
+                //CfClient.getRequestFactory()
+                ).getForEntity("https://api.dev.cfdev.sh/v2/info", ApiInfo.class);
+
+        List<Resource<Space>> spaces = cfClient.getResources("https://api.dev.cfdev.sh/v2/spaces", Space.class);
+        Assert.assertNotNull(spaces);
+    }*/
 }

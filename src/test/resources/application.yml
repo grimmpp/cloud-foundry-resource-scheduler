@@ -2,6 +2,22 @@ VCAP_APPLICATION: '{ "application_id": "ae93a4ec-42c2-4087-b4f6-03d79c6aa822",  
 
 logging.level.de.grimmpp.AppManager: DEBUG
 
+security.basic.enabled: false
+management.security.enabled: false
+security.ignored: /**
+spring.security.enabled: false
+
+broker.api.admin-user:
+  username: admin
+  password: admin
+
+cfClient:
+  SSL-Validation-enabled: false
+  oauth-enabled: false
+  cfApi:
+    username: admin
+    password: admin
+
 server:
   protocol: http
   port: 8111
