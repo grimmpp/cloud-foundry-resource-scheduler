@@ -3,11 +3,6 @@ VCAP_SERVICES: '{"h2":[{"credentials":{"name":"cf_c9179b31_9203_4d59_b0f9_f0d9ba
 
 logging.level.de.grimmpp.AppManager: DEBUG
 
-security.basic.enabled: false
-management.security.enabled: false
-security.ignored: /**
-spring.security.enabled: false
-
 broker.api.admin-user:
   username: admin
   password: admin
@@ -24,16 +19,7 @@ server:
   port: 8111
 
 spring:
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
-#    driverClassName: org.h2.Driver
-#    username: sa
-#    password: sa
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate.ddl-auto: create-drop
     show-sql: true
-    properties:
-      hibernate:
-        enable_lazy_load_no_trans: true
+    properties.hibernate.enable_lazy_load_no_trans: true

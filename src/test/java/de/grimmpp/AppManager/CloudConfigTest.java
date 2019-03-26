@@ -60,4 +60,6 @@ public class CloudConfigTest {
         Assert.assertEquals("cf_c9179b31_9203_4d59_b0f9_f0d9ba504b41", si.getCredentials().get("name"));
         Assert.assertTrue(si.getCredentials().get("uri").length() > 20);
     }
+
+
 }

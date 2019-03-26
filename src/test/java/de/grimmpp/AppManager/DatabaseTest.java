@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -28,16 +27,11 @@ public class DatabaseTest {
     @Autowired
     private BindingRepository bindingRepository;
 
-    @Value("${spring.jpa.database-platform}")
-    private String dbPlatform;
-
     @Autowired
     DataSource dataSource;
 
     @Test
     public void datasourceTest() {
-        Assert.assertEquals("org.hibernate.dialect.H2Dialect", dbPlatform);
-
         Assert.assertNotNull(dataSource);
 
         Assert.assertTrue(dataSource instanceof HikariDataSource);

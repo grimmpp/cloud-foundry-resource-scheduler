@@ -1,1 +1,18 @@
 logging.level.de.grimmpp.AppManager: INFO
+
+broker.api.admin-user:
+  username: ${BROKER_BASIC_AUTH_USERNAME}
+  password: ${BROKER_BASIC_AUTH_PASSWORD}
+
+cfClient:
+  SSL-Validation-enabled: true
+  oauth-enabled: true
+  cfApi:
+    username: ${CF_ADMIN_USERNAME}
+    password: ${CF_ADMIN_PASSWORD}
+
+spring:
+  jpa:
+    hibernate.ddl-auto: create
+    show-sql: false
+    properties.hibernate.enable_lazy_load_no_trans: true
