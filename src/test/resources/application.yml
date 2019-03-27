@@ -3,6 +3,8 @@ VCAP_SERVICES: '{"h2":[{"credentials":{"name":"cf_c9179b31_9203_4d59_b0f9_f0d9ba
 
 logging.level.de.grimmpp.AppManager: DEBUG
 
+scheduling-enabled: false
+
 broker.api.admin-user:
   username: admin
   password: admin

@@ -5,7 +5,6 @@ import de.grimmpp.AppManager.mocks.CfApiMockController;
 import de.grimmpp.AppManager.model.cfClient.Application;
 import de.grimmpp.AppManager.model.cfClient.Resource;
 import de.grimmpp.AppManager.model.database.Binding;
-import de.grimmpp.AppManager.model.database.Parameter;
 import de.grimmpp.AppManager.model.database.ServiceInstance;
 import org.junit.Assert;
 import org.junit.Test;
