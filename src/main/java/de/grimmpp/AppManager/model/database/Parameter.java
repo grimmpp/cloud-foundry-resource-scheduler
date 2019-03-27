@@ -2,6 +2,7 @@ package de.grimmpp.AppManager.model.database;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,8 @@ import java.util.Map;
 @Entity(name = "parameter")
 @Table(name = "parameter")
 public class Parameter implements Serializable {
+
+    private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     @Id @GeneratedValue
     private long id;
@@ -49,7 +52,6 @@ public class Parameter implements Serializable {
     }
 
     public static List<Parameter> convert(String reference, Map<String,Object> parameters) {
-        ObjectMapper om = new ObjectMapper();
         List<Parameter> params = new ArrayList<>();
         for(String key: parameters.keySet()) {
             String value = getStringValue(parameters.get(key), "");
@@ -77,7 +79,7 @@ public class Parameter implements Serializable {
     private static String getStringValue(Object o, String defaultValue) {
         if (o != null && o instanceof String) return o.toString();
         try {
-            return new ObjectMapper().writeValueAsString(o);
+            return objectMapper.writeValueAsString(o);
         } catch (JsonProcessingException e) {
             log.error("Cannot convert parameter value", e);
         }

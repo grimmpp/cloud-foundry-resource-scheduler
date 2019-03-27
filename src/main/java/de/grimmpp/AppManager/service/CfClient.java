@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.config.SSLUtil;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.VcapApplication;
 import de.grimmpp.AppManager.model.cfClient.*;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ import java.util.List;
 public class CfClient {
 
     private RestTemplate restTemplate = null;
-    private ObjectMapper objectMapper = null;
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public static final String URL_PARAMETERS = "?order-direction=asc&results-per-page=100&page=%d";
 
@@ -74,10 +75,6 @@ public class CfClient {
             log.info("Disable SSL!");
             SSLUtil.turnOffSslChecking();
         }
-
-        log.debug("Create ObjectMapper");
-        objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     private RestTemplate getRestTemplate() {

@@ -1,6 +1,7 @@
 package de.grimmpp.AppManager.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.cfClient.Application;
 import de.grimmpp.AppManager.model.cfClient.ApplicationInstances;
 import de.grimmpp.AppManager.model.cfClient.Resource;
@@ -13,6 +14,8 @@ import java.io.IOException;
 @Slf4j
 @Service
 public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
+
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     public static final String PLAN_ID = "31b97c09-9cfb-4108-8894-33eb22016cee";
 
@@ -29,7 +32,7 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
 
             String aiUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCES, false, b.getApplicationId());
             ApplicationInstances ais = cfClient.getObject(aiUrl, ApplicationInstances.class);
-            log.trace("App Instances: {}", new ObjectMapper().writeValueAsString(ais));
+            log.trace("App Instances: {}", objectMapper.writeValueAsString(ais));
 
             long expiredAIs = ais.values().stream().filter(i -> Long.valueOf(i.getUptime()) < time).count();
             log.debug("Expired app instances: {}", expiredAIs);

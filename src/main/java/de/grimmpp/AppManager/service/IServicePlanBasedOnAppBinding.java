@@ -22,7 +22,7 @@ public abstract class IServicePlanBasedOnAppBinding extends IServicePlanBasedOnS
 
             String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, b.getApplicationId());
             Resource<Application> app = cfClient.getResource(appUrl, Application.class);
-            log.trace("App data: {}", new ObjectMapper().writeValueAsString(app));
+            log.trace("App data: {}", getObjectMapper().writeValueAsString(app));
 
             Parameter p = pRepo.findByReferenceAndKey(b.getServiceInstanceId(), "time");
             long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(p.getValue());

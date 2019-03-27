@@ -1,6 +1,7 @@
 package de.grimmpp.AppManager.mocks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.VcapApplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,8 @@ import java.util.*;
 
 @Controller()
 public class CfApiMockController {
+
+    private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     @Autowired
     private VcapApplication vcapApp;
@@ -159,6 +162,6 @@ public class CfApiMockController {
 
     public static <ReturnType> ReturnType getResourceContent(String resourceName, Class<ReturnType> returnType) throws IOException {
         String content = getResourceContent(resourceName);
-        return (ReturnType) new ObjectMapper().readValue(content, returnType);
+        return (ReturnType) objectMapper.readValue(content, returnType);
     }
 }

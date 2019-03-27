@@ -1,5 +1,7 @@
 package de.grimmpp.AppManager.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.database.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +38,10 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
 
             performActionForServiceInstance(si);
         }
+    }
+
+    @Override
+    public ObjectMapper getObjectMapper() {
+        return ObjectMapperFactory.getObjectMapper();
     }
 }

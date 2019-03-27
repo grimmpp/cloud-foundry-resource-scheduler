@@ -1,6 +1,7 @@
 package de.grimmpp.AppManager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.ServiceInfo;
 import de.grimmpp.AppManager.model.VcapServices;
 import org.junit.Assert;
@@ -17,6 +18,8 @@ import java.util.List;
 @SpringBootTest(classes = { AppManagerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class CloudConfigTest {
 
+    private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+
     @Value("${VCAP_SERVICES}")
     private String vcapServicesStr;
 
@@ -24,7 +27,7 @@ public class CloudConfigTest {
 
     @Test
     public void vcapServiceMySqlTest() throws IOException {
-        VcapServices vcapServices = new ObjectMapper().readValue(vcapServicesStrMysql, VcapServices.class);
+        VcapServices vcapServices = objectMapper.readValue(vcapServicesStrMysql, VcapServices.class);
         Assert.assertEquals(1, vcapServices.keySet().size());
 
         List<ServiceInfo> lSi = vcapServices.get("p-mysql");
@@ -44,7 +47,7 @@ public class CloudConfigTest {
 
     @Test
     public void vcapServiceH2Test() throws IOException {
-        VcapServices vcapServices = new ObjectMapper().readValue(vcapServicesStr, VcapServices.class);
+        VcapServices vcapServices = objectMapper.readValue(vcapServicesStr, VcapServices.class);
         Assert.assertEquals(1, vcapServices.keySet().size());
 
         List<ServiceInfo> lSi = vcapServices.get("h2");

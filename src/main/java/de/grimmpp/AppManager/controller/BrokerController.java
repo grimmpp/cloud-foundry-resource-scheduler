@@ -2,6 +2,7 @@ package de.grimmpp.AppManager.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.database.*;
 import de.grimmpp.AppManager.service.TimeParameterValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
     @Qualifier("ProjectLogLevel")
     private String projectLogLevel;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     private void logRequest(Object request) {
         if (projectLogLevel.equals(LogLevel.DEBUG) ||

@@ -2,6 +2,7 @@ package de.grimmpp.AppManager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.controller.BrokerController;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.mocks.CfApiMockController;
 import de.grimmpp.AppManager.model.database.*;
 import org.junit.Assert;
@@ -24,6 +25,8 @@ import java.util.Optional;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { AppManagerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class BrokerControllerTest {
+
+    private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     @Autowired
     private ServiceInstanceRepository serviceInstanceRepository;
@@ -77,7 +80,7 @@ public class BrokerControllerTest {
         cleanDatabase();
 
         String jsonRequest = CfApiMockController.getResourceContent("serviceInstanceProvisioningRequest_simple").replace("1w 3d 5m", "wrong time format");
-        CreateServiceInstanceRequest request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time;1w 3d 5m"
+        CreateServiceInstanceRequest request = objectMapper.readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time;1w 3d 5m"
 
         boolean b = false;
         try {

@@ -1,5 +1,6 @@
 package de.grimmpp.AppManager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,6 +8,7 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ServiceInfo {
     private String binding_name;
     private Map<String,String> credentials;

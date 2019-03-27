@@ -1,6 +1,7 @@
 package de.grimmpp.AppManager.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.ServiceInfo;
 import de.grimmpp.AppManager.model.VcapServices;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,12 +16,14 @@ import java.util.Arrays;
 @Configuration
 public class CloudConfig {
 
+    private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+
     @Value("${VCAP_SERVICES}")
     private String vcapServices;
 
     @Bean
     public VcapServices getServiceInfos() throws IOException {
-        return new ObjectMapper().readValue(vcapServices, VcapServices.class);
+        return objectMapper.readValue(vcapServices, VcapServices.class);
     }
 
     @Bean

@@ -1,6 +1,7 @@
 package de.grimmpp.AppManager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.mocks.CfApiMockController;
 import de.grimmpp.AppManager.service.TimeParameterValidator;
 import org.junit.Assert;
@@ -10,6 +11,8 @@ import org.springframework.cloud.servicebroker.model.instance.CreateServiceInsta
 import java.io.IOException;
 
 public class TimeParameterValidatorTest {
+
+    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     private long s = 1000;
     private long m = 60 * 1000;
@@ -107,7 +110,7 @@ public class TimeParameterValidatorTest {
     @Test
     public void defaultTimeTest() throws IOException {
         String jsonRequest = CfApiMockController.getResourceContent("serviceInstanceProvisioningRequest_simple");
-        CreateServiceInstanceRequest request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time;1w 3d 5m"
+        CreateServiceInstanceRequest request = objectMapper.readValue(jsonRequest, CreateServiceInstanceRequest.class); //"time;1w 3d 5m"
 
         String defaultTime = "8h";
 
@@ -138,7 +141,7 @@ public class TimeParameterValidatorTest {
 
         // change to wrong format
         jsonRequest = jsonRequest.replace("\"time\": \"1w 3d 5m\"", "\"time\": \"a\"");
-        request = new ObjectMapper().readValue(jsonRequest, CreateServiceInstanceRequest.class);
+        request = objectMapper.readValue(jsonRequest, CreateServiceInstanceRequest.class);
         b = TimeParameterValidator.containsTimeParameter(request.getParameters());
         Assert.assertTrue(b);
         b = TimeParameterValidator.validateParameterValue(request.getParameters());

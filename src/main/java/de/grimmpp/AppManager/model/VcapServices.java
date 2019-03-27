@@ -1,5 +1,6 @@
 package de.grimmpp.AppManager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VcapServices extends HashMap<String, List<ServiceInfo>> {
 
     public ServiceInfo getServiceInfo(String serviceInstanceName) {
