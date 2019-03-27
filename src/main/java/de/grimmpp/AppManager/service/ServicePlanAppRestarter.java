@@ -1,12 +1,12 @@
 package de.grimmpp.AppManager.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.cfClient.Application;
 import de.grimmpp.AppManager.model.cfClient.ApplicationInstances;
 import de.grimmpp.AppManager.model.cfClient.Resource;
 import de.grimmpp.AppManager.model.database.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -15,14 +15,30 @@ import java.io.IOException;
 @Service
 public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
 
-    private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-
     public static final String PLAN_ID = "31b97c09-9cfb-4108-8894-33eb22016cee";
 
     @Override
     public String getServicePlanId() {
         return PLAN_ID;
     }
+
+    @Override
+    public void saveRequestParamters(CreateServiceInstanceRequest request) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void saveRequestParamters(CreateServiceInstanceBindingRequest request) {
+        // requires parameter "time"
+        String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
+        pRepo.save(
+                Parameter.builder()
+                        .reference(request.getServiceInstanceId())
+                        .key(TimeParameterValidator.KEY)
+                        .value(time)
+                        .build());
+    }
+
 
     @Override
     protected void performActionForBinding(ServiceInstance si, Binding b, Resource<Application> app, Long time) throws IOException {

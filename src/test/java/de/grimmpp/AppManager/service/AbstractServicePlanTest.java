@@ -1,6 +1,7 @@
 package de.grimmpp.AppManager.service;
 
 import de.grimmpp.AppManager.AppManagerApplication;
+import de.grimmpp.AppManager.helper.ServicePlanFinder;
 import de.grimmpp.AppManager.model.database.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -60,6 +61,7 @@ public class AbstractServicePlanTest {
 
         spTestBasedOnSi.run();
 
+        Assert.assertEquals(spTestBasedOnSi.planId, ServicePlanFinder.findServicePlan(spTestBasedOnSi.planId).getServicePlanId());
         Assert.assertEquals(1, spTestBasedOnSi.runCount);
     }
 
@@ -116,6 +118,7 @@ public class AbstractServicePlanTest {
 
         spTestBasedOnB.run();
 
+        Assert.assertEquals(spTestBasedOnB.planId, ServicePlanFinder.findServicePlan(spTestBasedOnB.planId).getServicePlanId());
         Assert.assertEquals(2, spTestBasedOnB.runCount);
     }
 

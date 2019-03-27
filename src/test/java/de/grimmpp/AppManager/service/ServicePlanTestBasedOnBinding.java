@@ -5,6 +5,8 @@ import de.grimmpp.AppManager.model.cfClient.Resource;
 import de.grimmpp.AppManager.model.database.Binding;
 import de.grimmpp.AppManager.model.database.ServiceInstance;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -29,5 +31,15 @@ public class ServicePlanTestBasedOnBinding extends IServicePlanBasedOnAppBinding
     @Override
     public String getServicePlanId() {
         return planId;
+    }
+
+    @Override
+    public void saveRequestParamters(CreateServiceInstanceRequest request) {
+
+    }
+
+    @Override
+    public void saveRequestParamters(CreateServiceInstanceBindingRequest request) {
+
     }
 }

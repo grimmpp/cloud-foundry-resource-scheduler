@@ -6,6 +6,8 @@ import de.grimmpp.AppManager.model.cfClient.Space;
 import de.grimmpp.AppManager.model.database.Parameter;
 import de.grimmpp.AppManager.model.database.ServiceInstance;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -62,5 +64,22 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
     @Override
     public String getServicePlanId() {
         return PLAN_ID;
+    }
+
+    @Override
+    public void saveRequestParamters(CreateServiceInstanceRequest request) {
+        // requires parameter "time"
+        String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
+        pRepo.save(
+                Parameter.builder()
+                        .reference(request.getServiceInstanceId())
+                        .key(TimeParameterValidator.KEY)
+                        .value(time)
+                        .build());
+    }
+
+    @Override
+    public void saveRequestParamters(CreateServiceInstanceBindingRequest request) {
+        // Nothing to do.
     }
 }

@@ -2,12 +2,14 @@ package de.grimmpp.AppManager.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.helper.ObjectMapperFactory;
+import de.grimmpp.AppManager.helper.ServicePlanFinder;
 import de.grimmpp.AppManager.model.database.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 @Slf4j
@@ -28,12 +30,14 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
     @Value("${scheduling-enabled}")
     private Boolean schedulingEnabled;
 
-    @Override
-    public ObjectMapper getObjectMapper() {
-        return ObjectMapperFactory.getObjectMapper();
-    }
+    protected ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     protected abstract void performActionForServiceInstance(ServiceInstance si) throws IOException;
+
+    @PostConstruct
+    public void init() {
+        ServicePlanFinder.registerServicePlan(getServicePlanId(), this);
+    }
 
     @Scheduled(fixedDelay = 60 * 1000) // 1 min
     public void scheduledRun() throws IOException {
