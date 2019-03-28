@@ -26,9 +26,10 @@ public abstract class IServicePlanBasedOnAppBinding extends IServicePlanBasedOnS
 
             Parameter p = pRepo.findByReferenceAndKey(b.getBindingId(), "time");
             long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(p.getValue());
-            log.debug("Time: parameter value: {}, milli sec: {}", p.getValue(), time);
+            long timeInSec = time / 1000;
+            log.debug("Time: parameter value: {}, milli sec: {}", p.getValue(), timeInSec);
 
-            performActionForBinding(si, b, app, time);
+            performActionForBinding(si, b, app, timeInSec);
         }
 
     }

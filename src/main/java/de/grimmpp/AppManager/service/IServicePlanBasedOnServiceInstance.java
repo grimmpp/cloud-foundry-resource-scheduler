@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 
 @Slf4j
 public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan {
@@ -37,19 +38,22 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
     @PostConstruct
     public void init() {
         ServicePlanFinder.registerServicePlan(getServicePlanId(), this);
+        if (schedulingEnabled) log.debug("Service Plan {} is activated.", getClass().getSimpleName());
+        else log.debug("Service Plan {} is NOT activated.", getClass().getSimpleName());
     }
-
+/*
     @Scheduled(fixedDelay = 60 * 1000) // 1 min
     public void scheduledRun() throws IOException {
+        log.debug("Scheduler triggered: {}", getClass().getSimpleName());
         if (schedulingEnabled) run();
-    }
+    }*/
 
     @Override
     public void run() throws IOException {
-        log.debug("Start run of {}", getClass().getSimpleName());
+        String planId = getServicePlanId();
+        log.debug("Start run of {} and for plan id {}", getClass().getSimpleName(), planId);
 
         long startTime = System.currentTimeMillis();
-        String planId = getServicePlanId();
 
         for(ServiceInstance si: siRepo.findByServicePlanId(planId)) {
             log.debug("Check service instance: {}, plan: {}, org: {}, space: {}",
@@ -65,6 +69,6 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
         long dMilli = d % 1000;
         long dSec = (d / 1000) % 60 ;
         long dMin = d / (1000 * 60);
-        log.debug("Duration of Run {}min {}sec {}milli", dMin, dSec, dMilli);
+        log.debug("Duration of run {}min {}sec {}milli", dMin, dSec, dMilli);
     }
 }

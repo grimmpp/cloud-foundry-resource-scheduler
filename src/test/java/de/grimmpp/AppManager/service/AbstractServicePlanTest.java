@@ -3,7 +3,6 @@ package de.grimmpp.AppManager.service;
 import de.grimmpp.AppManager.AppManagerApplication;
 import de.grimmpp.AppManager.helper.ServicePlanFinder;
 import de.grimmpp.AppManager.model.database.*;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { AppManagerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class AbstractServicePlanTest {

@@ -2,9 +2,6 @@ package de.grimmpp.AppManager.model.cfClient;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.util.Map;
 
 @Data

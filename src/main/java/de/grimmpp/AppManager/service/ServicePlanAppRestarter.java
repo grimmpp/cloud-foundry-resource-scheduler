@@ -1,5 +1,6 @@
 package de.grimmpp.AppManager.service;
 
+import de.grimmpp.AppManager.model.cfClient.AppInstanceState;
 import de.grimmpp.AppManager.model.cfClient.Application;
 import de.grimmpp.AppManager.model.cfClient.ApplicationInstances;
 import de.grimmpp.AppManager.model.cfClient.Resource;
@@ -10,6 +11,8 @@ import org.springframework.cloud.servicebroker.model.instance.CreateServiceInsta
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,7 +44,7 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
 
 
     @Override
-    protected void performActionForBinding(ServiceInstance si, Binding b, Resource<Application> app, Long time) throws IOException {
+    protected void performActionForBinding(ServiceInstance si, Binding b, Resource<Application> app, Long timeInSec) throws IOException {
 
         if (app.getEntity().getState().equals("STARTED")) {
             log.debug("App {} is in state: STARTED", b.getApplicationId());
@@ -50,10 +53,14 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
             ApplicationInstances ais = cfClient.getObject(aiUrl, ApplicationInstances.class);
             log.trace("App Instances: {}", objectMapper.writeValueAsString(ais));
 
-            long expiredAIs = ais.values().stream().filter(i -> Long.valueOf(i.getUptime()) < time).count();
-            log.debug("Expired app instances: {}", expiredAIs);
+            List<AppInstanceState> expiredAis = ais.values().stream().filter(i -> i.getUptime() > timeInSec).collect(Collectors.toList());
+            log.debug("Expired app instances: {}", expiredAis.size());
+            for(String index : ais.keySet()) {
+                AppInstanceState state = ais.get(index);
+                log.debug("Compare time: App {}, instance {}, state: {}, uptime: {} sec", app.getMetadata().getGuid(), index, state.getState(), state.getUptime());
+            }
 
-            if (expiredAIs > 0) {
+            if (expiredAis.size() > 0) {
                 for (int i = 0; i < app.getEntity().getInstances(); i++) {
 
                     String logLine = String.format("app instances %s, app: %s, space: %s, org: %s, si: %s, plan: %s",
@@ -63,7 +70,7 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
                         String instanceUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCE, false, b.getApplicationId(), String.valueOf(i));
                         cfClient.deleteResource(instanceUrl);
 
-                        log.info("Restarted "+logLine);
+                        log.info("=> Restarted "+logLine);
                     } catch (Throwable e) {
                         log.error("Cannot restart instance: "+i+", "+logLine, e);
                     }

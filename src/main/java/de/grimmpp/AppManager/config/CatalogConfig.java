@@ -28,7 +28,7 @@ public class CatalogConfig {
                             Plan.builder()
                                     .id(ServicePlanAppRestarter.PLAN_ID)
                                     .name("App Restarter")
-                                    .description("")
+                                    .description("Bound apps to service instances of the plan App Restarter will be restarted by the specified and given time. (Default time is 8h) All app instances will be restarted at the same point in time.")
                                     .bindable(true)
                                     .free(true)
                                     .build(),

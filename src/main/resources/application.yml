@@ -1,7 +1,7 @@
 
 logging.level.de.grimmpp.AppManager: INFO
 
-scheduler-enabled: true
+scheduling-enabled: true
 
 broker.api.admin-user:
   username: ${BROKER_BASIC_AUTH_USERNAME}
@@ -16,6 +16,8 @@ cfClient:
 
 spring:
   jpa:
-    hibernate.ddl-auto: create
+    hibernate.ddl-auto: update
     show-sql: false
-    properties.hibernate.enable_lazy_load_no_trans: true
+    properties.hibernate:
+      enable_lazy_load_no_trans: true
+      globally_quoted_identifiers: true

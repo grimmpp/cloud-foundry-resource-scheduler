@@ -52,7 +52,7 @@ public class AppRestarterTest {
         String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, b.getApplicationId());
         Resource<Application> app = cfClient.getResource(appUrl, Application.class);
 
-        long time = 5 * 60 * 60 * 1000;  //5h
+        long time = 10 * 1000;  //10sec
 
         appRestarter.performActionForBinding(si, b, app, time);
 

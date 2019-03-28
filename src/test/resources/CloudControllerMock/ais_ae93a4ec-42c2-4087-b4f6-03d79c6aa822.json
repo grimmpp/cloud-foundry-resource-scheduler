@@ -2,12 +2,12 @@
   "0": {
     "state": "RUNNING",
     "since": 1403140717.984577,
-    "uptime": 2405
+    "uptime": 24050
   },
   "1": {
     "state": "STARTING",
     "since": 3625363939.984577,
-    "uptime": 1394
+    "uptime": 13940
   },
   "2": {
     "details": "internal error",

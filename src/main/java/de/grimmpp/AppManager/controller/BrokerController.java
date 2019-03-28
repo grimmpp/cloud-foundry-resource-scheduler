@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * See docs
@@ -44,8 +45,8 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     private void logRequest(Object request) {
-        if (projectLogLevel.equals(LogLevel.DEBUG) ||
-            projectLogLevel.equals(LogLevel.TRACE)) {
+        if (projectLogLevel.toLowerCase().equals(LogLevel.DEBUG.toString().toLowerCase()) ||
+            projectLogLevel.toLowerCase().equals(LogLevel.TRACE.toString().toLowerCase())) {
             try {
                 log.info("CreateServiceInstanceRequest: " + objectMapper.writeValueAsString(request));
             } catch (JsonProcessingException e) {
@@ -80,7 +81,9 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
         logRequest(request);
 
         paraRepo.deleteAll(paraRepo.findByReference(request.getServiceInstanceId()));
-        siRepo.delete(siRepo.findByServiceInstanceId(request.getServiceInstanceId()));
+
+        ServiceInstance si = siRepo.findByServiceInstanceId(request.getServiceInstanceId());
+        if (si != null) siRepo.delete(si);
 
         return DeleteServiceInstanceResponse.builder().build();
     }
@@ -127,8 +130,8 @@ public class BrokerController implements ServiceInstanceService, ServiceInstance
         List<Parameter> parameters = paraRepo.findByReference(request.getBindingId());
         paraRepo.deleteAll(parameters);
 
-        Binding b = bindingRepo.findById(request.getBindingId()).get();
-        bindingRepo.delete(b);
+        Optional<Binding> b = bindingRepo.findById(request.getBindingId());
+        if (b.isPresent()) bindingRepo.delete(b.get());
 
         logRequest(request);
     }

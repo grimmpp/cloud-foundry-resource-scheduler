@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.AppManager.helper.ObjectMapperFactory;
 import de.grimmpp.AppManager.model.ServiceInfo;
 import de.grimmpp.AppManager.model.VcapServices;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 @Configuration
+@Slf4j
 public class CloudConfig {
 
     private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -41,6 +43,8 @@ public class CloudConfig {
                 .password(si.getCredentials().get("password"))
                 .url(si.getCredentials().get("uri"))
                 .build();
+
+        log.debug("created datasource: driverClass: {}");
 
         return ds;
     }

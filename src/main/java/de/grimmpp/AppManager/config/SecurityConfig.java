@@ -26,8 +26,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 // for testing only - controller won't be delivered in production code.
                 .authorizeRequests().antMatchers("/cf_api_mock/**").permitAll()
-                .and()
-                .authorizeRequests().antMatchers("/v2/**").hasRole("ADMIN")
+                .antMatchers("/**").hasRole("ADMIN")
                 .and().httpBasic();
     }
 
