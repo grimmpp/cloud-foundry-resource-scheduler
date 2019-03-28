@@ -4,7 +4,6 @@ import de.grimmpp.AppManager.model.cfClient.Application;
 import de.grimmpp.AppManager.model.cfClient.Resource;
 import de.grimmpp.AppManager.model.database.Binding;
 import de.grimmpp.AppManager.model.database.ServiceInstance;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.UUID;
 
-@Slf4j
 @Service
 public class ServicePlanTestBasedOnBinding extends IServicePlanBasedOnAppBinding {
     public String planId = UUID.randomUUID().toString();
@@ -24,7 +22,7 @@ public class ServicePlanTestBasedOnBinding extends IServicePlanBasedOnAppBinding
             Thread.sleep(1234);
             runCount++;
         } catch (InterruptedException e) {
-            log.error("", e);
+            e.printStackTrace();
         }
     }
 
