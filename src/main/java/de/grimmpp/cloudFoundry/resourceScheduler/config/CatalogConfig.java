@@ -23,11 +23,11 @@ public class CatalogConfig {
                         .metadata("documentationUrl", "https://github.com/grimmpp/cloud-foundry-resource-scheduler")
                         .metadata("supportUrl","https://github.com/grimmpp/cloud-foundry-resource-scheduler")
                         .plans(
-/*
+
                             Plan.builder()
-                                    .id("blub")
-                                    .name("HttpEndpointTrigger")
-                                    .description("")
+                                    .id("d0704f41-4a2e-4bea-b1f7-2319640cbe97")
+                                    .name("HttpEndpointScheduler")
+                                    .description("d0704f41-4a2e-4bea-b1f7-2319640cbe97")
                                     .metadata("bullets", new String[]{
                                         "Client timeout for the scheduler is set to 1s. The scheduler is NOT evaluating and is NOT waiting for a response.",
                                         "Parameter \"{\"time\": \"1w 3d 2h 5m\"}\" (w=week, d=day, h=hour, m=minute) is time after which the trigger starts.",
@@ -36,7 +36,7 @@ public class CatalogConfig {
                                     .bindable(false)
                                     .free(true)
                                     .build(),
-*/
+
                             Plan.builder()
                                     .id(ServicePlanAppRestarter.PLAN_ID)
                                     .name("AppRestarter")

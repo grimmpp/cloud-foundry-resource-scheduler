@@ -10,6 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.servicebroker.model.catalog.Catalog;
+import org.springframework.cloud.servicebroker.model.catalog.Plan;
+import org.springframework.cloud.servicebroker.model.catalog.ServiceDefinition;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -20,7 +23,10 @@ import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { AppManagerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class SwitchOffAppsInSpaceTest {
+public class ServicePlanSwitchOffAppsInSpaceTest {
+
+    @Autowired
+    private Catalog catalog;
 
     @Autowired
     private ParameterRepository pRepo;
@@ -34,6 +40,17 @@ public class SwitchOffAppsInSpaceTest {
     private String siid = UUID.randomUUID().toString();
     private String spaceId = "162dc5a3-ddb9-41bc-9fb0-38cc7aec73f9";
     private String productionSpaceId = "bc8d3381-390d-4bd7-8c71-25309900a2e3";
+
+    @Test
+    public void catalogTest() {
+        boolean b = false;
+        for(Plan p: catalog.getServiceDefinitions().get(0).getPlans()) {
+            b = p.getId().equals(servicePlan.getServicePlanId());
+            if (b) break;
+        }
+        Assert.assertTrue(b);
+    }
+
 
     @Test
     public void stopAllAppsTest() throws IOException {

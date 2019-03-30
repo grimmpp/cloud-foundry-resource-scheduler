@@ -11,6 +11,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.servicebroker.model.catalog.Catalog;
+import org.springframework.cloud.servicebroker.model.catalog.Plan;
+import org.springframework.cloud.servicebroker.model.catalog.ServiceDefinition;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -19,7 +22,10 @@ import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { AppManagerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class AppRestarterTest {
+public class ServicePlanAppRestarterTest {
+
+    @Autowired
+    private Catalog catalog;
 
     @Autowired
     private CfApiMockController cfApiMockController;
@@ -33,6 +39,17 @@ public class AppRestarterTest {
     private String siId = UUID.randomUUID().toString();
     private String appId = "ae93a4ec-42c2-4087-b4f6-03d79c6aa822";
     private String spaceId = "359b04a4-1006-4c57-b14d-9dfec46f8e78";
+
+
+    @Test
+    public void catalogTest() {
+        boolean b = false;
+        for(Plan p: catalog.getServiceDefinitions().get(0).getPlans()) {
+            b = p.getId().equals(appRestarter.getServicePlanId());
+            if (b) break;
+        }
+        Assert.assertTrue(b);
+    }
 
     @Test
     public void runTest() throws IOException {
