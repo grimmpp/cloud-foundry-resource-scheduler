@@ -11,13 +11,13 @@ The Resource Scheduler consists of two parts:
 Both parts, Service Broker and Scheduler, is contained within the same application. You only need to deploy one applicatin into Cloud Foundry.
 
 ## Technical data
-* Used Spring Cloud Open Service Broker API
-* Spring Boot is used as Java Framework
-** Spring Boot Security (Basic Auth) is implemented.
-** Spring Boot JPA & Hibernate is used for DB connection.
-** Cloud Foundry API Client is self-developed and contained within this project. (This was done because I wanted to be able to run all junit tests locally.)
-* In the section/module test there is an additional RestController which mocks the Cloud Foundry API in order to test the full roundtrip of API calls to Cloud Foundry. (OAuth tests are not included.)
-* Lombock is used to keed class definitions simpler.
+* Used Spring Cloud Open **Service Broker API**
+* **Spring Boot** is used as Java Framework
+  * **Spring Boot Security** (Basic Auth) is implemented.
+  * **Spring Boot JPA & Hibernate** is used for DB connection.
+  * **Cloud Foundry API Client** is self-developed and contained within this project. (This was done because I wanted to be able to run all junit tests locally.)
+* In the section/module test there is an additional RestController which **mocks** the **Cloud Foundry API** in order to test the full roundtrip of API calls to Cloud Foundry. (OAuth tests are not included.)
+* **Lombock** is used to keed class definitions simpler.
 
 
 ## How to build and run unit tests
