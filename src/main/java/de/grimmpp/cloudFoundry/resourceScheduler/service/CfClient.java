@@ -138,13 +138,12 @@ public class CfClient {
         ResponseEntity<String> resp = restTemplate.exchange(absoluteUrl, HttpMethod.DELETE, request, String.class);
     }
 
-    public <Entity> Entity updateResource(String absoluteUrl, Object payload, Class<Entity> entityType) throws IOException {
-        String body = objectMapper.writeValueAsString(payload);
-
-        HttpEntity<String> request = new HttpEntity<>(body, getHttpHeaders());
+    public <Entity> Entity updateResource(String absoluteUrl, String jsonBody, Class<Entity> entityType) throws IOException {
+        HttpEntity<String> request = new HttpEntity<>(jsonBody, getHttpHeaders());
         ResponseEntity<String> resp = getRestTemplate().exchange(absoluteUrl, HttpMethod.PUT, request, String.class);
 
         if (resp.getBody() == null) return null;
+        if (entityType.equals(String.class)) return (Entity) resp.getBody();
         return objectMapper.readValue(resp.getBody(), entityType);
     }
 

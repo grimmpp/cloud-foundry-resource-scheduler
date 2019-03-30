@@ -1,5 +1,4 @@
-
-logging.level.de.grimmpp.AppManager: INFO
+logging.level.de.grimmpp.cloudFoundry.resourceScheduler: INFO
 
 scheduling-enabled: true
 

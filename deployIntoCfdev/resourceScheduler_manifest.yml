@@ -7,7 +7,7 @@ applications:
       CF_ADMIN_PASSWORD: admin
       CF_ADMIN_USERNAME: admin
       cfClient.SSL-Validation-enabled: "false"
-      logging.level.de.grimmpp.AppManager: DEBUG
+      logging.level.de.grimmpp.cloudFoundry.resourceScheduler: DEBUG
       management.endpoints.enabled-by-default: "true"
       management.endpoints.web.exposure.include: '*'
       scheduling-enabled: "true"

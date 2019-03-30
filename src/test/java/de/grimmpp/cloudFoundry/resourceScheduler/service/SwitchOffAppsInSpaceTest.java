@@ -54,7 +54,7 @@ public class SwitchOffAppsInSpaceTest {
         String url = "/v2/apps/15b3885d-0351-4b9b-8697-86641668c123";
         Assert.assertEquals(url, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
 
-        String requestBody = "\"{\\\"state\\\": \\\"STOPPED\\\"}\"";
+        String requestBody = "{\"state\": \"STOPPED\"}";
         Assert.assertEquals(requestBody, cfApiMockController.getLastOperation(CfApiMockController.KEY_REQUEST_BODY));
     }
 

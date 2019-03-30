@@ -16,7 +16,7 @@ public class AppConfig {
 
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
-    @Value("${logging.level.de.grimmpp.AppManager}")
+    @Value("${logging.level.de.grimmpp.cloudFoundry.resourceScheduler}")
     private String projectLogLevel;
 
     @Bean

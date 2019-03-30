@@ -30,7 +30,7 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
 
             String url = cfClient.buildUrl(CfClient.URI_APPS_OF_SPACE, si.getSpaceId());
             List<Resource<Application>> apps = cfClient.getResources(url, Application.class);
-            log.debug("Collected {} apps from space: {}", apps.size(), PLAN_ID);
+            log.debug("Found {} apps in space: {} for service instance {}", apps.size(), PLAN_ID, si.getServiceInstanceId());
 
             for (Resource<Application> app : apps) {
 
@@ -46,13 +46,17 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
                     if (timeDiff > time) {
                         try {
                             String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, app.getMetadata().getGuid());
-                            cfClient.updateResource(appUrl, "{\"state\": \"STOPPED\"}", String.class);
+                            cfClient.updateResource(appUrl, "{\"state\": \"STOPPED\"}", Application.class);
 
-                            log.info("Stopped ");
+                            log.info("=> Stopped app " + logLine);
                         } catch (Throwable e) {
                             log.error("Cannot stop " + logLine, e);
                         }
+                    } else {
+                        log.debug("App {} is not expired. Last app update: {}", app.getMetadata().getGuid(), app.getMetadata().getUpdated_at());
                     }
+                } else {
+                    log.debug("App {} is in state {}", app.getMetadata().getGuid(), app.getEntity().getState());
                 }
             }
         } else {

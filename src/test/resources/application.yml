@@ -3,7 +3,7 @@ VCAP_SERVICES: '{"h2":[{"credentials":{"name":"cf_c9179b31_9203_4d59_b0f9_f0d9ba
 
 management.endpoints.web.exposure.include: '*'
 
-logging.level.de.grimmpp.AppManager: DEBUG
+logging.level.de.grimmpp.cloudFoundry.resourceScheduler: DEBUG
 
 scheduling-enabled: false
 
