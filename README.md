@@ -1,4 +1,4 @@
-# WORK IN PROGRESS
+# WORK IN PROGRESS 
 
 # Cloud Foundry Resource Scheduler Service
 The purpose of Resource Scheduler is to trigger endpoints after a defined timespan. There are some specific use cases implemented as service plans like restarting of applications or switching them off after a given time.
