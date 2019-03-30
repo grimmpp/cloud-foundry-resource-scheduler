@@ -10,7 +10,7 @@ The Resource Scheduler consists of two parts:
 
 Both parts, Service Broker and Scheduler, is contained within the same application. 
 
-## How to build and run unit test
+## How to build and run unit tests
 ````
 ./gradlew clean build
 ````
