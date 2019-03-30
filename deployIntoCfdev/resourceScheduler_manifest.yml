@@ -1,0 +1,23 @@
+applications:
+  - name: resourceScheduler
+    disk_quota: 1G
+    env:
+      BROKER_BASIC_AUTH_PASSWORD: admin
+      BROKER_BASIC_AUTH_USERNAME: admin
+      CF_ADMIN_PASSWORD: admin
+      CF_ADMIN_USERNAME: admin
+      cfClient.SSL-Validation-enabled: "false"
+      logging.level.de.grimmpp.AppManager: DEBUG
+      management.endpoints.enabled-by-default: "true"
+      management.endpoints.web.exposure.include: '*'
+      scheduling-enabled: "true"
+      spring.jpa.hibernate.ddl-auto: update
+      spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MariaDBDialect
+      spring.jpa.properties.hibernate.globally_quoted_identifiers: "true"
+    instances: 1
+    memory: 1G
+    routes:
+      - route: resourceScheduler.dev.cfdev.sh
+    services:
+      - mysql
+    stack: cflinuxfs3

@@ -7,6 +7,8 @@
     <bytecodeTargetLevel>
       <module name="grimmpp.AppManager.main" target="1.8" />
       <module name="grimmpp.AppManager.test" target="1.8" />
+      <module name="grimmpp.resourceScheduler.main" target="1.8" />
+      <module name="grimmpp.resourceScheduler.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
