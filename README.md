@@ -10,6 +10,14 @@ The Resource Scheduler consists of two parts:
 
 Both parts, Service Broker and Scheduler, is contained within the same application. You only need to deploy one applicatin into Cloud Foundry.
 
+## Service Plan Overview
+For details have a look into the <a href="./src/main/java/de/grimmpp/AppManager/config/CatalogConfig.java">catalog</a> file.
+* **AppRestarter**: Restarts frequently a bound app after a defined time completely. (All instances at the same time) 
+* **SwitchOffAppsInSpace**: Switches off all apps after a defined time in a space which doesn't contain prod in the name. (No bindings needed) This plan can be used for test and demo spaces in order to save resources from the quota.
+* **Planned Service Plans**
+  * **RollingContainerRestarter**: Restart of an application whinout downtime.
+  * **HttpEndpointScheduler**: Triggers frequently arbitrary http endpoints after a defined time.
+
 ## Technical data
 * Used Spring Cloud Open **Service Broker API**
 * **Spring Boot** is used as Java Framework
@@ -18,7 +26,11 @@ Both parts, Service Broker and Scheduler, is contained within the same applicati
   * **Cloud Foundry API Client** is self-developed and contained within this project. (This was done because I wanted to be able to run all junit tests locally.)
 * In the section/module test there is an additional RestController which **mocks** the **Cloud Foundry API** in order to test the full roundtrip of API calls to Cloud Foundry. (OAuth tests are not included.)
 * **Lombock** is used to keed class definitions simpler.
-
+* **Planned Things**
+  * Multi-threaded scheduler for all service plans
+  * Multi application instances => currently it's a single container application.
+  * Tracing for http communication + header field which identifies sender
+  * A few service plans see above
 
 ## How to build and run unit tests
 ````
