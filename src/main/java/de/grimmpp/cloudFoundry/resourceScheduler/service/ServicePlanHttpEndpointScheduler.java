@@ -65,7 +65,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
                 log.debug("Do {} call to url {} - ", httpMethod, url);
                 restTemplate.exchange(url, HttpMethod.valueOf(httpMethod), entity, String.class);
 
-                //TODO: not yet tested
+                //TODO: lastCall parameter must be set & it's not yet tested
             } catch (Throwable e) {
                 log.error("Was not able to do http call. ", e);
             }
