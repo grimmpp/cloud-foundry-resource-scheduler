@@ -32,7 +32,9 @@ public class CatalogConfig {
                                         "Client timeout for the scheduler is set to 1s. The scheduler is NOT evaluating and is NOT waiting for a response.",
                                         "Parameter \"{\"time\": \"1w 3d 2h 5m\"}\" (w=week, d=day, h=hour, m=minute) is time after which the trigger starts.",
                                         "Parameter \"{\"url\": \"https://full-url.com\"}\" is the url which will be triggered.",
-                                        "Parameter \"{\"httpMethod\": \"GET\"}\" (values: GET, PUT, POST, DELETE) is the http method which will be set. (Default value is GET)"})
+                                        "Optional Parameter \"{\"httpMethod\": \"GET\"}\" (values: GET, PUT, POST, DELETE) is the http method which will be set. (Default value is GET)",
+                                        "Optional Parameter \"{\"httpHeaders\": [\"Content-Type: application/json; charset=UTF-8\"]}"
+                                    })
                                     .bindable(false)
                                     .free(true)
                                     .build(),
