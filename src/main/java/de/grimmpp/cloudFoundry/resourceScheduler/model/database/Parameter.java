@@ -94,4 +94,8 @@ public class Parameter implements Serializable {
     public static String getParameterValueByKey(List<Parameter> params, String key) {
         return getParameterByKey(params, key).getValue();
     }
+
+    public static boolean containsKey(List<Parameter> params, String key) {
+        return params.stream().anyMatch(p -> p.getKey().equals(key));
+    }
 }

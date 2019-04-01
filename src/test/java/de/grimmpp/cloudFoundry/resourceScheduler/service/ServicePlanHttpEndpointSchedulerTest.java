@@ -65,9 +65,10 @@ public class ServicePlanHttpEndpointSchedulerTest {
         servicePlan.saveRequestParamters(request);
 
         List<Parameter> params = parameterRepository.findByReference(siId);
-        Assert.assertEquals(3, params.size());
+        Assert.assertEquals(6, params.size());
         Assert.assertEquals("1h", Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY));
         Assert.assertEquals(url, Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_URL));
+        Assert.assertEquals(Boolean.TRUE, Boolean.valueOf(Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_SSL_ENABLED)));
         Assert.assertNotNull(Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_LAST_CALL));
     }
 
@@ -83,16 +84,18 @@ public class ServicePlanHttpEndpointSchedulerTest {
                 .parameters("url", url)
                 .parameters("httpMethod", "PUT")
                 .parameters("httpHeaders", headers)
+                .parameters("sslEnabled", false)
                 .build();
 
         servicePlan.saveRequestParamters(request);
 
         List<Parameter> params = parameterRepository.findByReference(siId);
-        Assert.assertEquals(5, params.size());
+        Assert.assertEquals(6, params.size());
         Assert.assertEquals("1h", Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY));
         Assert.assertEquals(url, Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_URL));
         Assert.assertEquals("PUT", Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_HTTP_METHOD));
         Assert.assertEquals(headersAsStr, Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_HTTP_HEADERS));
+        Assert.assertEquals(Boolean.FALSE, Boolean.valueOf(Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_SSL_ENABLED)));
         Assert.assertNotNull(Parameter.getParameterByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_LAST_CALL));
     }
 
@@ -186,6 +189,30 @@ public class ServicePlanHttpEndpointSchedulerTest {
 
         Assert.assertEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
         Assert.assertEquals("PUT", mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_HTTP_METHOD));
+    }
+
+    @Test
+    public void actionTest2() throws IOException {
+        String siId = UUID.randomUUID().toString();
+        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", "Authorization: Basic YWRtaW46YWRtaW4="};
+        String _url = url + "?"+UUID.randomUUID().toString(); // Make url unique in order to check it after the junit test
+        ServiceInstance si = ServiceInstance.builder()
+                .serviceInstanceId(siId)
+                .build();
+        CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
+                .planId(servicePlan.getServicePlanId())
+                .serviceInstanceId(siId)
+                .parameters("time", "1h")
+                .parameters("url", _url)
+                .parameters("httpHeaders", headers)
+                .build();
+
+        servicePlan.saveRequestParamters(request);
+
+        servicePlan.performActionForServiceInstance(si);
+
+        Assert.assertEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
+        Assert.assertEquals("GET", mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_HTTP_METHOD));
     }
 
 

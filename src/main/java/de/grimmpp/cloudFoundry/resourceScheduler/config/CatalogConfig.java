@@ -33,7 +33,8 @@ public class CatalogConfig {
                                         "Parameter \"{\"time\": \"1w 3d 2h 5m\"}\" (w=week, d=day, h=hour, m=minute) is time after which the trigger starts.",
                                         "Parameter \"{\"url\": \"https://full-url.com\"}\" is the url which will be triggered.",
                                         "Optional Parameter \"{\"httpMethod\": \"GET\"}\" (values: GET, PUT, POST, DELETE) is the http method which will be set. (Default value is GET)",
-                                        "Optional Parameter \"{\"httpHeaders\": [\"Content-Type: application/json; charset=UTF-8\"]}"
+                                        "Optional Parameter \"{\"httpHeaders\": [\"Content-Type: application/json; charset=UTF-8\"]} ",
+                                        "Optional Parameter \"{\"sslEnabled\": false} (Default value is true) "
                                     })
                                     .bindable(false)
                                     .free(true)

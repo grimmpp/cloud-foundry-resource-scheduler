@@ -6,18 +6,29 @@ import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.ServiceInstance;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,17 +42,53 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     public static final String PLAN_ID = "d0704f41-4a2e-4bea-b1f7-2319640cbe97";
     public static final String PARAMETER_KEY_HTTP_METHOD = "httpMethod";
     public static final String PARAMETER_KEY_HTTP_HEADERS = "httpHeaders";
+    public static final String PARAMETER_KEY_SSL_ENABLED = "sslEnabled";
     public static final String PARAMETER_KEY_URL = "url";
     public static final String[] MANDATORY_PARAMETERS = new String[]{ TimeParameterValidator.KEY, PARAMETER_KEY_URL};
-    public static final String[] OPTIONAL_PARAMETERS = new String[]{ PARAMETER_KEY_HTTP_METHOD, PARAMETER_KEY_HTTP_HEADERS };
+    //public static final String[] OPTIONAL_PARAMETERS = new String[]{ PARAMETER_KEY_HTTP_METHOD, PARAMETER_KEY_HTTP_HEADERS };
     public static final String PARAMETER_KEY_LAST_CALL = "lastCall";
 
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+    private RestTemplate restTemplate = null;
+    private RestTemplate noSslRestTempalte = null;
 
-    private RestTemplate restTemplate = new RestTemplateBuilder()
-            .setConnectTimeout(Duration.ofSeconds(1))
-            .setReadTimeout(Duration.ofSeconds(1))
-            .build();
+    private RestTemplate getRestTemplate(boolean sslEnabled) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        if (!sslEnabled) {
+            log.debug("Disabled SSL.");
+            if (noSslRestTempalte == null) {
+                TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+
+                SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
+                        .loadTrustMaterial(null, acceptingTrustStrategy)
+                        .build();
+
+                SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+
+                CloseableHttpClient httpClient = HttpClients.custom()
+                        .setSSLSocketFactory(csf)
+                        .build();
+
+                HttpComponentsClientHttpRequestFactory requestFactory =
+                        new HttpComponentsClientHttpRequestFactory();
+
+                requestFactory.setHttpClient(httpClient);
+                requestFactory.setConnectTimeout(500);
+                requestFactory.setReadTimeout(500);
+
+                noSslRestTempalte = new RestTemplate(requestFactory);
+            }
+            return noSslRestTempalte;
+
+        } else {
+            if (restTemplate == null) {
+                SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+                requestFactory.setConnectTimeout(500);
+                requestFactory.setReadTimeout(500);
+                restTemplate = new RestTemplate(requestFactory);
+            }
+            return restTemplate;
+        }
+    }
 
     @Override
     protected void performActionForServiceInstance(ServiceInstance si) throws IOException {
@@ -53,23 +100,23 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
             String time = Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY);
             log.debug("time is expired after {} milli sec.", time);
             try {
-                String url = Parameter.getParameterValueByKey(params, PARAMETER_KEY_URL);
-                String httpMethod = Parameter.getParameterValueByKey(params, PARAMETER_KEY_HTTP_METHOD);
                 HttpHeaders headers = new HttpHeaders();
                 String headersStr = Parameter.getParameterValueByKey(params, PARAMETER_KEY_HTTP_HEADERS);
-                for (String header: objectMapper.readValue(headersStr, String[].class)) {
+                for (String header : objectMapper.readValue(headersStr, String[].class)) {
                     headers.set(header.split(": ")[0], header.split(": ")[1]);
                 }
                 HttpEntity<String> entity = new HttpEntity<>(headers);
+                String url = Parameter.getParameterValueByKey(params, PARAMETER_KEY_URL);
+                String httpMethod = Parameter.getParameterValueByKey(params, PARAMETER_KEY_HTTP_METHOD);
+                Boolean sslEnabled = Boolean.valueOf(Parameter.getParameterValueByKey(params, PARAMETER_KEY_SSL_ENABLED));
+                log.debug("Do {} call to url {}", httpMethod, url);
+                getRestTemplate(sslEnabled).exchange(url, HttpMethod.valueOf(httpMethod), entity, String.class);
 
-                log.debug("Do {} call to url {} - ", httpMethod, url);
-                restTemplate.exchange(url, HttpMethod.valueOf(httpMethod), entity, String.class);
-
+                // Remember last http call made.
                 Parameter.getParameterByKey(params, PARAMETER_KEY_LAST_CALL).setValue(Long.toString(System.currentTimeMillis()));
                 pRepo.save(Parameter.getParameterByKey(params, PARAMETER_KEY_LAST_CALL));
-                //TODO: not yet tested
             } catch (Throwable e) {
-                log.error("Was not able to do http call. ", e);
+                log.error("Was not able to do http call.", e);
             }
         } else {
             log.debug("time is not expired.");
@@ -118,6 +165,12 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
                     .key(PARAMETER_KEY_HTTP_METHOD)
                     .value(request.getParameters().get(PARAMETER_KEY_HTTP_METHOD).toString())
                     .build());
+        } else {
+            params.add(Parameter.builder()
+                    .reference(request.getServiceInstanceId())
+                    .key(PARAMETER_KEY_HTTP_METHOD)
+                    .value(HttpMethod.GET.toString())
+                    .build());
         }
 
         // http headers
@@ -132,6 +185,32 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            try {
+                String headers = objectMapper.writeValueAsString(new String[]{});
+                params.add(Parameter.builder()
+                        .reference(request.getServiceInstanceId())
+                        .key(PARAMETER_KEY_HTTP_HEADERS)
+                        .value(headers)
+                        .build());
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // ssl enabled
+        if (request.getParameters().containsKey(PARAMETER_KEY_SSL_ENABLED)) {
+            params.add(Parameter.builder()
+                    .reference(request.getServiceInstanceId())
+                    .key(PARAMETER_KEY_SSL_ENABLED)
+                    .value(request.getParameters().get(PARAMETER_KEY_SSL_ENABLED).toString())
+                    .build());
+        } else {
+            params.add(Parameter.builder()
+                    .reference(request.getServiceInstanceId())
+                    .key(PARAMETER_KEY_SSL_ENABLED)
+                    .value(Boolean.TRUE.toString())
+                    .build());
         }
 
         params.add(Parameter.builder()

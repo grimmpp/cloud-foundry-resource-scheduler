@@ -25,6 +25,10 @@ cf target -o cfdev-org -s switchOffAllApps
 cf push test-app2 -p .\test-app  -m 20M -k 20M -b staticfile_buildpack
 cf create-service "Resource Scheduler" "SwitchOffAppsInSpace" switchOffAppsAfter2min -c '{\"time\":\"2m\"}'
 
+## Create Instance of HttpEndpointScheduler
+cf create-service "Resource Scheduler" "HttpEndpointScheduler" httpEPsi -c '{\"time\":\"10s\", \"url\":\"https://test-app1.dev.cfdev.sh\", \"sslEnabled\": false}'
+
+
 # cleanup
 # cf unbind-service test-app appRestarter1
 # cf delete test-app1
@@ -32,5 +36,7 @@ cf create-service "Resource Scheduler" "SwitchOffAppsInSpace" switchOffAppsAfter
 
 # cf delete test-app2
 # cf delete-service switchOffAppsAfter2min
+
+# cf delete-service httpEPsi
 
 # cf delete-service-broker appManager
