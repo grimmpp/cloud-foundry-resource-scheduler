@@ -50,13 +50,13 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         List<Parameter> params = pRepo.findByReference(si.getServiceInstanceId());
 
         if (isTimeExpired(params)) {
-            String time = params.stream().filter(p -> p.getKey().equals(TimeParameterValidator.KEY)).findFirst().get().getValue();
+            String time = Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY);
             log.debug("time is expired after {} milli sec.", time);
             try {
-                String url = params.stream().filter(p -> p.getKey().equals(PARAMETER_KEY_URL)).findFirst().get().getValue();
-                String httpMethod = params.stream().filter(p -> p.getKey().equals(PARAMETER_KEY_HTTP_METHOD)).findFirst().get().getValue();
+                String url = Parameter.getParameterValueByKey(params, PARAMETER_KEY_URL);
+                String httpMethod = Parameter.getParameterValueByKey(params, PARAMETER_KEY_HTTP_METHOD);
                 HttpHeaders headers = new HttpHeaders();
-                String headersStr = params.stream().filter(p -> p.getKey().equals(PARAMETER_KEY_HTTP_HEADERS)).findFirst().get().getValue();
+                String headersStr = Parameter.getParameterValueByKey(params, PARAMETER_KEY_HTTP_HEADERS);
                 for (String header: objectMapper.readValue(headersStr, String[].class)) {
                     headers.set(header.split(": ")[0], header.split(": ")[1]);
                 }
@@ -65,6 +65,8 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
                 log.debug("Do {} call to url {} - ", httpMethod, url);
                 restTemplate.exchange(url, HttpMethod.valueOf(httpMethod), entity, String.class);
 
+                Parameter.getParameterByKey(params, PARAMETER_KEY_LAST_CALL).setValue(Long.toString(System.currentTimeMillis()));
+                pRepo.save(Parameter.getParameterByKey(params, PARAMETER_KEY_LAST_CALL));
                 //TODO: not yet tested
             } catch (Throwable e) {
                 log.error("Was not able to do http call. ", e);

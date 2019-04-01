@@ -3,6 +3,7 @@ package de.grimmpp.cloudFoundry.resourceScheduler.model.database;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
+import de.grimmpp.cloudFoundry.resourceScheduler.service.TimeParameterValidator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -84,5 +85,13 @@ public class Parameter implements Serializable {
             log.error("Cannot convert parameter value", e);
         }
         return defaultValue;
+    }
+
+    public static Parameter getParameterByKey(List<Parameter> params, String key) {
+        return params.stream().filter(p -> p.getKey().equals(key)).findFirst().get();
+    }
+
+    public static String getParameterValueByKey(List<Parameter> params, String key) {
+        return getParameterByKey(params, key).getValue();
     }
 }
