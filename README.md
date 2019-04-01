@@ -2,7 +2,7 @@
 
 # Cloud Foundry Resource Scheduler Service
 The purpose of Resource Scheduler is to trigger endpoints after a defined timespan. There are some specific use cases implemented as service plans like restarting of applications or switching them off after a given time.
-There is also a generic service plan available which allows to trigger arbitrary http endpoint. In the service <a href="./src/main/java/de/grimmpp/cloudFoundry/resourceScheduler/config/config/CatalogConfig.java">catalog</a> you can find the list of supported service plans. 
+There is also a generic service plan available which allows to trigger arbitrary http endpoint. In the service <a href="./src/main/java/de/grimmpp/cloudFoundry/resourceScheduler/config/CatalogConfig.java">catalog</a> you can find the list of supported service plans. 
 
 The Resource Scheduler consists of two parts:
 1. Service Broker which can be registered in the Cloud Foundry marketplace and all service can be regularly booked via Cloud Foundry commands.
