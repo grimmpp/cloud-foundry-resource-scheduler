@@ -27,9 +27,9 @@ public class CatalogConfig {
                             Plan.builder()
                                     .id("d0704f41-4a2e-4bea-b1f7-2319640cbe97")
                                     .name("HttpEndpointScheduler")
-                                    .description("d0704f41-4a2e-4bea-b1f7-2319640cbe97")
+                                    .description("Triggers defined http endpoint after a defined time. After the scheduler triggered all endpoints it will pause for 30 sec.")
                                     .metadata("bullets", new String[]{
-                                        "Client timeout for the scheduler is set to 1s. The scheduler is NOT evaluating and is NOT waiting for a response.",
+                                        "Client timeout for the scheduler is set to 500 milli sec. The scheduler is NOT evaluating and is NOT waiting for a response.",
                                         "Parameter \"{\"time\": \"1w 3d 2h 5m\"}\" (w=week, d=day, h=hour, m=minute) is time after which the trigger starts.",
                                         "Parameter \"{\"url\": \"https://full-url.com\"}\" is the url which will be triggered.",
                                         "Optional Parameter \"{\"httpMethod\": \"GET\"}\" (values: GET, PUT, POST, DELETE) is the http method which will be set. (Default value is GET)",
