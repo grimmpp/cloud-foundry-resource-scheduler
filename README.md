@@ -11,7 +11,7 @@ The Resource Scheduler consists of two parts:
 Both parts, Service Broker and Scheduler, is contained within the same application. You only need to deploy one applicatin into Cloud Foundry.
 
 ## Service Plan Overview
-For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundry/resourceScheduler/config/config/CatalogConfig.java">catalog</a> file.
+For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundry/resourceScheduler/config/CatalogConfig.java">catalog</a> file.
 * **AppRestarter**: Restarts frequently a bound app after a defined time completely. (All instances at the same time) 
 * **SwitchOffAppsInSpace**: Switches off all apps after a defined time in a space which doesn't contain prod in the name. (No bindings needed) This plan can be used for test and demo spaces in order to save resources from the quota.
 * **HttpEndpointScheduler**: Triggers frequently arbitrary http endpoints after a defined time.
