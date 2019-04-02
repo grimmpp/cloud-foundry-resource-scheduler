@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.servicebroker.model.catalog.Catalog;
 import org.springframework.cloud.servicebroker.model.catalog.Plan;
-import org.springframework.cloud.servicebroker.model.catalog.ServiceDefinition;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -59,7 +58,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
                 .spaceId(spaceId)
                 .build();
 
-        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY, "5m"));
+        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY_FIXED_DELAY, "5m"));
 
         // execute logic to test
         servicePlan.performActionForServiceInstance(si);
@@ -89,7 +88,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
         diffTime = 2* diffTime / (7 *24 * 60 * 60 * 1000); // in weeks *2
 
         // Store timespan in DB
-        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY, diffTime+"w"));
+        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY_FIXED_DELAY, diffTime+"w"));
 
         // execute logic to test
         servicePlan.performActionForServiceInstance(si);
@@ -112,7 +111,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
                 .spaceId(productionSpaceId)
                 .build();
 
-        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY, "5m"));
+        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY_FIXED_DELAY, "5m"));
 
         // execute logic to test
         servicePlan.performActionForServiceInstance(si);

@@ -25,7 +25,7 @@ public abstract class IServicePlanBasedOnAppBinding extends IServicePlanBasedOnS
             Resource<Application> app = cfClient.getResource(appUrl, Application.class);
             log.trace("App data: {}", objectMapper.writeValueAsString(app));
 
-            Parameter p = pRepo.findByReferenceAndKey(b.getBindingId(), "time");
+            Parameter p = pRepo.findByReferenceAndKey(b.getBindingId(), TimeParameterValidator.KEY_FIXED_DELAY);
             long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(p.getValue());
             long timeInSec = time / 1000;
             log.debug("Time: parameter value: {}, milli sec: {}", p.getValue(), timeInSec);

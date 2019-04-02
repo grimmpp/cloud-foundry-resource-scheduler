@@ -4,7 +4,6 @@ import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.AppInstanceState
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Application;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.ApplicationInstances;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Resource;
-import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Binding;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.ServiceInstance;
@@ -35,12 +34,12 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
 
     @Override
     public void saveRequestParamters(CreateServiceInstanceBindingRequest request) {
-        // requires parameter "time"
+        // requires parameter "fixedDelay"
         String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
         pRepo.save(
                 Parameter.builder()
                         .reference(request.getServiceInstanceId())
-                        .key(TimeParameterValidator.KEY)
+                        .key(TimeParameterValidator.KEY_FIXED_DELAY)
                         .value(time)
                         .build());
     }

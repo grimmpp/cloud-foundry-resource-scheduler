@@ -10,7 +10,6 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.TrustStrategy;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 import org.springframework.http.HttpEntity;
@@ -29,11 +28,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -44,7 +41,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     public static final String PARAMETER_KEY_HTTP_HEADERS = "httpHeaders";
     public static final String PARAMETER_KEY_SSL_ENABLED = "sslEnabled";
     public static final String PARAMETER_KEY_URL = "url";
-    public static final String[] MANDATORY_PARAMETERS = new String[]{ TimeParameterValidator.KEY, PARAMETER_KEY_URL};
+    public static final String[] MANDATORY_PARAMETERS = new String[]{ TimeParameterValidator.KEY_FIXED_DELAY, PARAMETER_KEY_URL};
     //public static final String[] OPTIONAL_PARAMETERS = new String[]{ PARAMETER_KEY_HTTP_METHOD, PARAMETER_KEY_HTTP_HEADERS };
     public static final String PARAMETER_KEY_LAST_CALL = "lastCall";
 
@@ -97,7 +94,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         List<Parameter> params = pRepo.findByReference(si.getServiceInstanceId());
 
         if (isTimeExpired(params)) {
-            String time = Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY);
+            String time = Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY_FIXED_DELAY);
             log.debug("time is expired after {} milli sec.", time);
             try {
                 HttpHeaders headers = new HttpHeaders();
@@ -154,8 +151,8 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
         params.add(Parameter.builder()
                 .reference(request.getServiceInstanceId())
-                .key(TimeParameterValidator.KEY)
-                .value(request.getParameters().get(TimeParameterValidator.KEY).toString())
+                .key(TimeParameterValidator.KEY_FIXED_DELAY)
+                .value(request.getParameters().get(TimeParameterValidator.KEY_FIXED_DELAY).toString())
                 .build());
 
         // http method
@@ -246,7 +243,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     }
 
     private void validateTime(CreateServiceInstanceRequest request){
-        String value = request.getParameters().get(TimeParameterValidator.KEY).toString();
+        String value = request.getParameters().get(TimeParameterValidator.KEY_FIXED_DELAY).toString();
         TimeParameterValidator.validateParameterValue(value);
     }
 
@@ -284,7 +281,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     private boolean isTimeExpired(List<Parameter> params) {
         Parameter pLastCall = params.stream().filter(p -> p.getKey().equals(PARAMETER_KEY_LAST_CALL)).findFirst().get();
         long lastCallTime = Long.valueOf(pLastCall.getValue());
-        Parameter pTimeSpan = params.stream().filter(p -> p.getKey().equals(TimeParameterValidator.KEY)).findFirst().get();
+        Parameter pTimeSpan = params.stream().filter(p -> p.getKey().equals(TimeParameterValidator.KEY_FIXED_DELAY)).findFirst().get();
         long timeSpan = TimeParameterValidator.getTimeInMilliSecFromParameterValue(pTimeSpan.getValue());
         long currentTime = System.currentTimeMillis();
         log.debug("lastCallTime: {}, timeSpan: {}, currentTime: {}", lastCallTime, timeSpan, currentTime);

@@ -3,6 +3,7 @@ package de.grimmpp.cloudFoundry.resourceScheduler;
 import com.zaxxer.hikari.HikariDataSource;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
+import de.grimmpp.cloudFoundry.resourceScheduler.service.TimeParameterValidator;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class DatabaseTest {
         String time = "1w 3d 5m";
 
         Map<String,Object> parameters = new HashMap<>();
-        parameters.put("time", time);
+        parameters.put(TimeParameterValidator.KEY_FIXED_DELAY, time);
 
         serviceInstanceRepository.save(
                 ServiceInstance.builder()
@@ -77,7 +78,7 @@ public class DatabaseTest {
         parameterRepository.save(
                 Parameter.builder()
                 .reference(id)
-                .key("time")
+                .key(TimeParameterValidator.KEY_FIXED_DELAY)
                 .value(time)
                 .build());
         parameterRepository.saveAll(Parameter.convert("_"+id, parameters));

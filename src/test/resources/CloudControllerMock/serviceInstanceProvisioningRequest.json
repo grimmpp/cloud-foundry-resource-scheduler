@@ -8,7 +8,7 @@
   },
   "async_accepted": true,
   "parameters": {
-    "time": "1w 3d 4h 2min"
+    "fixedDelay": "1w 3d 4h 2min"
   },
   "context": {
     "platform": "cloudfoundry",

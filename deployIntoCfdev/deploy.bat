@@ -16,17 +16,17 @@ cf enable-service-access "Resource Scheduler"
 cf create-service "Resource Scheduler" "AppRestarter" appRestarter1
 ## crate binding to existing test app
 cf push test-app1 -p .\test-app  -m 20M -k 20M -b staticfile_buildpack
-cf bind-service test-app1 appRestarter1 -c '{\"time\":\"2m\"}'
+cf bind-service test-app1 appRestarter1 -c '{\"fixedDelay\":\"2m\"}'
 
 
 ## Create Instance of SwitchOffAppsInSpace
 cf create-space switchOffAllApps
 cf target -o cfdev-org -s switchOffAllApps
 cf push test-app2 -p .\test-app  -m 20M -k 20M -b staticfile_buildpack
-cf create-service "Resource Scheduler" "SwitchOffAppsInSpace" switchOffAppsAfter2min -c '{\"time\":\"2m\"}'
+cf create-service "Resource Scheduler" "SwitchOffAppsInSpace" switchOffAppsAfter2min -c '{\"fixedDelay\":\"2m\"}'
 
 ## Create Instance of HttpEndpointScheduler
-cf create-service "Resource Scheduler" "HttpEndpointScheduler" httpEPsi -c '{\"time\":\"10s\", \"url\":\"https://test-app1.dev.cfdev.sh\", \"sslEnabled\": false}'
+cf create-service "Resource Scheduler" "HttpEndpointScheduler" httpEPsi -c '{\"fixedDelay\":\"10s\", \"url\":\"https://test-app1.dev.cfdev.sh\", \"sslEnabled\": false}'
 
 
 # cleanup

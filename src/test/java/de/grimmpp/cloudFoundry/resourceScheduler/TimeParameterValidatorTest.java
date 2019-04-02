@@ -127,7 +127,7 @@ public class TimeParameterValidatorTest {
         Assert.assertEquals("1w 3d 5m", parameterTime);
 
         // Take default time in none is in request
-        request.getParameters().remove(TimeParameterValidator.KEY);
+        request.getParameters().remove(TimeParameterValidator.KEY_FIXED_DELAY);
         b = TimeParameterValidator.containsTimeParameter(request.getParameters());
         Assert.assertTrue(!b);
         b = TimeParameterValidator.validateParameterValue(request.getParameters());
@@ -140,7 +140,7 @@ public class TimeParameterValidatorTest {
         Assert.assertEquals(defaultTime, parameterTime);
 
         // change to wrong format
-        jsonRequest = jsonRequest.replace("\"time\": \"1w 3d 5m\"", "\"time\": \"a\"");
+        jsonRequest = jsonRequest.replace("\""+TimeParameterValidator.KEY_FIXED_DELAY+"\": \"1w 3d 5m\"", "\""+TimeParameterValidator.KEY_FIXED_DELAY+"\": \"a\"");
         request = objectMapper.readValue(jsonRequest, CreateServiceInstanceRequest.class);
         b = TimeParameterValidator.containsTimeParameter(request.getParameters());
         Assert.assertTrue(b);

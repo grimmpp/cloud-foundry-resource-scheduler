@@ -6,15 +6,13 @@ import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstan
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class TimeParameterValidator {
 
-    public static final String KEY = "time";
+    public static final String KEY_FIXED_DELAY = "fixedDelay";
     public static final String DEFAULT_VALUE = "8h";
 
     public static final boolean doesNotContainOrValidTimeParameter(Map<String,Object> map) {
@@ -22,18 +20,18 @@ public class TimeParameterValidator {
     }
 
     public static final boolean containsTimeParameter(Map<String,Object> parameters) {
-        return parameters.containsKey(KEY);
+        return parameters.containsKey(KEY_FIXED_DELAY);
     }
 
     public static final boolean validateParameterValue(Map<String,Object> parameters) {
         if (!containsTimeParameter(parameters)) return  false;
-        return validateParameterValue(parameters.get(KEY).toString());
+        return validateParameterValue(parameters.get(KEY_FIXED_DELAY).toString());
     }
 
     public static final String getParameterTime(Map<String,Object> parameters, String defaultTime) {
         if (!containsTimeParameter(parameters)) return defaultTime;
         if (!validateParameterValue(parameters)) throw new RuntimeException();
-        return formattingAndCleaning(parameters.get(KEY).toString());
+        return formattingAndCleaning(parameters.get(KEY_FIXED_DELAY).toString());
     }
 
     public static final String getParameterTime(CreateServiceInstanceRequest request, String defaultTime) {
@@ -46,7 +44,7 @@ public class TimeParameterValidator {
 
     public static final long getTimeInMilliSecFromParameterValue(Map<String,Object> parameters, String defaultTime) {
         String time = defaultTime;
-        if (containsTimeParameter(parameters)) time = parameters.get(KEY).toString();
+        if (containsTimeParameter(parameters)) time = parameters.get(KEY_FIXED_DELAY).toString();
         return getTimeInMilliSecFromParameterValue(time);
     }
 

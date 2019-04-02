@@ -58,7 +58,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
-                .parameters("time", "1h")
+                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, "1h")
                 .parameters("url", url)
                 .build();
 
@@ -66,7 +66,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
 
         List<Parameter> params = parameterRepository.findByReference(siId);
         Assert.assertEquals(6, params.size());
-        Assert.assertEquals("1h", Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY));
+        Assert.assertEquals("1h", Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY_FIXED_DELAY));
         Assert.assertEquals(url, Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_URL));
         Assert.assertEquals(Boolean.TRUE, Boolean.valueOf(Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_SSL_ENABLED)));
         Assert.assertNotNull(Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_LAST_CALL));
@@ -80,7 +80,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
-                .parameters("time", "1h")
+                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, "1h")
                 .parameters("url", url)
                 .parameters("httpMethod", "PUT")
                 .parameters("httpHeaders", headers)
@@ -91,7 +91,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
 
         List<Parameter> params = parameterRepository.findByReference(siId);
         Assert.assertEquals(6, params.size());
-        Assert.assertEquals("1h", Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY));
+        Assert.assertEquals("1h", Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY_FIXED_DELAY));
         Assert.assertEquals(url, Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_URL));
         Assert.assertEquals("PUT", Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_HTTP_METHOD));
         Assert.assertEquals(headersAsStr, Parameter.getParameterValueByKey(params, ServicePlanHttpEndpointScheduler.PARAMETER_KEY_HTTP_HEADERS));
@@ -105,7 +105,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
-                .parameters("time", "1h")
+                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, "1h")
                 .parameters("url", "ftp://localhost/123")
                 .build();
 
@@ -127,7 +127,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
-                .parameters("time", "1h")
+                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, "1h")
                 .parameters("url", url)
                 .parameters("httpMethod", "REMOVE")
                 .parameters("httpHeaders", headers)
@@ -151,7 +151,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
-                .parameters("time", "1h")
+                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, "1h")
                 .parameters("url", url)
                 .parameters("httpHeaders", headers)
                 .build();
@@ -177,7 +177,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
-                .parameters("time", "1h")
+                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, "1h")
                 .parameters("url", _url)
                 .parameters("httpMethod", "PUT")
                 .parameters("httpHeaders", headers)
@@ -202,7 +202,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
-                .parameters("time", "1h")
+                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, "1h")
                 .parameters("url", _url)
                 .parameters("httpHeaders", headers)
                 .build();
@@ -227,7 +227,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
-                .parameters("time", "1s")
+                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, "1s")
                 .parameters("url", _url)
                 .parameters("httpMethod", "PUT")
                 .parameters("httpHeaders", headers)

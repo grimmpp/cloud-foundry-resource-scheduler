@@ -16,7 +16,7 @@
     "space_guid": "359b04a4-1006-4c57-b14d-9dfec46f8e78"
   },
   "parameters": {
-    "time": "1w 3d 5m"
+    "fixedDelay": "1w 3d 5m"
   },
   "context": {
     "platform": "cloudfoundry",
