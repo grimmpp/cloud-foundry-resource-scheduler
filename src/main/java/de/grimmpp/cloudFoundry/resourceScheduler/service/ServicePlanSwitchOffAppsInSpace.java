@@ -39,8 +39,8 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
                     String logLine = String.format("app: %s, space: %s because of serviceInstance: %s",
                             app.getMetadata().getGuid(), si.getSpaceId(), si.getServiceInstanceId());
 
-                    Parameter p = pRepo.findByReferenceAndKey(si.getServiceInstanceId(), TimeParameterValidator.KEY_FIXED_DELAY);
-                    long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(p.getValue());
+                    Parameter p = pRepo.findByReferenceAndKey(si.getServiceInstanceId(), Parameter.KEY_FIXED_DELAY);
+                    long time = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(p.getValue());
 
                     long timeDiff = currentTime - app.getMetadata().getUpdated_at().getTime();
                     if (timeDiff > time) {
@@ -77,7 +77,7 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
         pRepo.save(
                 Parameter.builder()
                         .reference(request.getServiceInstanceId())
-                        .key(TimeParameterValidator.KEY_FIXED_DELAY)
+                        .key(Parameter.KEY_FIXED_DELAY)
                         .value(time)
                         .build());
     }

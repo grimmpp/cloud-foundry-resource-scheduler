@@ -58,7 +58,7 @@ public class DatabaseTest {
         String time = "1w 3d 5m";
 
         Map<String,Object> parameters = new HashMap<>();
-        parameters.put(TimeParameterValidator.KEY_FIXED_DELAY, time);
+        parameters.put(Parameter.KEY_FIXED_DELAY, time);
 
         serviceInstanceRepository.save(
                 ServiceInstance.builder()
@@ -78,7 +78,7 @@ public class DatabaseTest {
         parameterRepository.save(
                 Parameter.builder()
                 .reference(id)
-                .key(TimeParameterValidator.KEY_FIXED_DELAY)
+                .key(Parameter.KEY_FIXED_DELAY)
                 .value(time)
                 .build());
         parameterRepository.saveAll(Parameter.convert("_"+id, parameters));

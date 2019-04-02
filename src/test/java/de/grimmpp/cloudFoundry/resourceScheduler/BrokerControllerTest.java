@@ -73,7 +73,7 @@ public class BrokerControllerTest {
         List<Parameter> parameterList = parameterRepository.findByReference(siId);
         Assert.assertEquals(1, parameterList.size());
         Assert.assertEquals(siId, parameterList.get(0).getReference());
-        Assert.assertEquals(TimeParameterValidator.KEY_FIXED_DELAY, parameterList.get(0).getKey());
+        Assert.assertEquals(Parameter.KEY_FIXED_DELAY, parameterList.get(0).getKey());
         Assert.assertEquals(time, parameterList.get(0).getValue());
     }
 
@@ -112,7 +112,7 @@ public class BrokerControllerTest {
         List<Parameter> parameterList = parameterRepository.findByReference(bId);
         Assert.assertEquals(1, parameterList.size());
         Assert.assertEquals(bId, parameterList.get(0).getReference());
-        Assert.assertEquals(TimeParameterValidator.KEY_FIXED_DELAY, parameterList.get(0).getKey());
+        Assert.assertEquals(Parameter.KEY_FIXED_DELAY, parameterList.get(0).getKey());
         Assert.assertEquals(time, parameterList.get(0).getValue());
     }
 
@@ -166,7 +166,7 @@ public class BrokerControllerTest {
         UpdateServiceInstanceRequest request = UpdateServiceInstanceRequest.builder()
                 .planId(planId)
                 .serviceInstanceId(siId)
-                .parameters(TimeParameterValidator.KEY_FIXED_DELAY, newTime)
+                .parameters(Parameter.KEY_FIXED_DELAY, newTime)
                 .build();
 
         brokerController.updateServiceInstance(request);
@@ -179,7 +179,7 @@ public class BrokerControllerTest {
         List<Parameter> parameterList = parameterRepository.findByReference(siId);
         boolean containsParameterTime = false;
         for(Parameter p: parameterList) {
-            if (p.getKey().equals(TimeParameterValidator.KEY_FIXED_DELAY)) {
+            if (p.getKey().equals(Parameter.KEY_FIXED_DELAY)) {
                 containsParameterTime = true;
                 Assert.assertEquals(newTime, p.getValue());
             }

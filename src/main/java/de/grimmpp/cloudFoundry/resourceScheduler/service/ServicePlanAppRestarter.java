@@ -39,7 +39,7 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
         pRepo.save(
                 Parameter.builder()
                         .reference(request.getServiceInstanceId())
-                        .key(TimeParameterValidator.KEY_FIXED_DELAY)
+                        .key(Parameter.KEY_FIXED_DELAY)
                         .value(time)
                         .build());
     }

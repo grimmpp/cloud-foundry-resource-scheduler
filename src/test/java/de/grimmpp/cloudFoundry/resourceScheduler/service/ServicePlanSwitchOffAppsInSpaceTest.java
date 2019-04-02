@@ -58,7 +58,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
                 .spaceId(spaceId)
                 .build();
 
-        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY_FIXED_DELAY, "5m"));
+        pRepo.save(new Parameter(siid, Parameter.KEY_FIXED_DELAY, "5m"));
 
         // execute logic to test
         servicePlan.performActionForServiceInstance(si);
@@ -88,7 +88,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
         diffTime = 2* diffTime / (7 *24 * 60 * 60 * 1000); // in weeks *2
 
         // Store timespan in DB
-        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY_FIXED_DELAY, diffTime+"w"));
+        pRepo.save(new Parameter(siid, Parameter.KEY_FIXED_DELAY, diffTime+"w"));
 
         // execute logic to test
         servicePlan.performActionForServiceInstance(si);
@@ -111,7 +111,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
                 .spaceId(productionSpaceId)
                 .build();
 
-        pRepo.save(new Parameter(siid, TimeParameterValidator.KEY_FIXED_DELAY, "5m"));
+        pRepo.save(new Parameter(siid, Parameter.KEY_FIXED_DELAY, "5m"));
 
         // execute logic to test
         servicePlan.performActionForServiceInstance(si);

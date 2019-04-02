@@ -37,13 +37,6 @@ import java.util.List;
 public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnServiceInstance {
 
     public static final String PLAN_ID = "d0704f41-4a2e-4bea-b1f7-2319640cbe97";
-    public static final String PARAMETER_KEY_HTTP_METHOD = "httpMethod";
-    public static final String PARAMETER_KEY_HTTP_HEADERS = "httpHeaders";
-    public static final String PARAMETER_KEY_SSL_ENABLED = "sslEnabled";
-    public static final String PARAMETER_KEY_URL = "url";
-    public static final String[] MANDATORY_PARAMETERS = new String[]{ TimeParameterValidator.KEY_FIXED_DELAY, PARAMETER_KEY_URL};
-    //public static final String[] OPTIONAL_PARAMETERS = new String[]{ PARAMETER_KEY_HTTP_METHOD, PARAMETER_KEY_HTTP_HEADERS };
-    public static final String PARAMETER_KEY_LAST_CALL = "lastCall";
 
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
     private RestTemplate restTemplate = null;
@@ -94,24 +87,24 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         List<Parameter> params = pRepo.findByReference(si.getServiceInstanceId());
 
         if (isTimeExpired(params)) {
-            String time = Parameter.getParameterValueByKey(params, TimeParameterValidator.KEY_FIXED_DELAY);
+            String time = Parameter.getParameterValueByKey(params, Parameter.KEY_FIXED_DELAY);
             log.debug("time is expired after {} milli sec.", time);
             try {
                 HttpHeaders headers = new HttpHeaders();
-                String headersStr = Parameter.getParameterValueByKey(params, PARAMETER_KEY_HTTP_HEADERS);
+                String headersStr = Parameter.getParameterValueByKey(params, Parameter.KEY_HTTP_HEADERS);
                 for (String header : objectMapper.readValue(headersStr, String[].class)) {
                     headers.set(header.split(": ")[0], header.split(": ")[1]);
                 }
                 HttpEntity<String> entity = new HttpEntity<>(headers);
-                String url = Parameter.getParameterValueByKey(params, PARAMETER_KEY_URL);
-                String httpMethod = Parameter.getParameterValueByKey(params, PARAMETER_KEY_HTTP_METHOD);
-                Boolean sslEnabled = Boolean.valueOf(Parameter.getParameterValueByKey(params, PARAMETER_KEY_SSL_ENABLED));
+                String url = Parameter.getParameterValueByKey(params, Parameter.KEY_URL);
+                String httpMethod = Parameter.getParameterValueByKey(params, Parameter.KEY_HTTP_METHOD);
+                Boolean sslEnabled = Boolean.valueOf(Parameter.getParameterValueByKey(params, Parameter.KEY_SSL_ENABLED));
                 log.debug("Do {} call to url {}", httpMethod, url);
                 getRestTemplate(sslEnabled).exchange(url, HttpMethod.valueOf(httpMethod), entity, String.class);
 
                 // Remember last http call made.
-                Parameter.getParameterByKey(params, PARAMETER_KEY_LAST_CALL).setValue(Long.toString(System.currentTimeMillis()));
-                pRepo.save(Parameter.getParameterByKey(params, PARAMETER_KEY_LAST_CALL));
+                Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL).setValue(Long.toString(System.currentTimeMillis()));
+                pRepo.save(Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL));
             } catch (Throwable e) {
                 log.error("Was not able to do http call.", e);
             }
@@ -143,40 +136,40 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         // url
         params.add(Parameter.builder()
                 .reference(request.getServiceInstanceId())
-                .key(PARAMETER_KEY_URL)
-                .value(request.getParameters().get(PARAMETER_KEY_URL).toString())
+                .key(Parameter.KEY_URL)
+                .value(request.getParameters().get(Parameter.KEY_URL).toString())
                 .build());
 
         // time
         String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
         params.add(Parameter.builder()
                 .reference(request.getServiceInstanceId())
-                .key(TimeParameterValidator.KEY_FIXED_DELAY)
-                .value(request.getParameters().get(TimeParameterValidator.KEY_FIXED_DELAY).toString())
+                .key(Parameter.KEY_FIXED_DELAY)
+                .value(request.getParameters().get(Parameter.KEY_FIXED_DELAY).toString())
                 .build());
 
         // http method
-        if (request.getParameters().containsKey(PARAMETER_KEY_HTTP_METHOD)) {
+        if (request.getParameters().containsKey(Parameter.KEY_HTTP_METHOD)) {
             params.add(Parameter.builder()
                     .reference(request.getServiceInstanceId())
-                    .key(PARAMETER_KEY_HTTP_METHOD)
-                    .value(request.getParameters().get(PARAMETER_KEY_HTTP_METHOD).toString())
+                    .key(Parameter.KEY_HTTP_METHOD)
+                    .value(request.getParameters().get(Parameter.KEY_HTTP_METHOD).toString())
                     .build());
         } else {
             params.add(Parameter.builder()
                     .reference(request.getServiceInstanceId())
-                    .key(PARAMETER_KEY_HTTP_METHOD)
+                    .key(Parameter.KEY_HTTP_METHOD)
                     .value(HttpMethod.GET.toString())
                     .build());
         }
 
         // http headers
-        if (request.getParameters().containsKey(PARAMETER_KEY_HTTP_HEADERS)) {
+        if (request.getParameters().containsKey(Parameter.KEY_HTTP_HEADERS)) {
             try {
-                String headers = objectMapper.writeValueAsString(request.getParameters().get(PARAMETER_KEY_HTTP_HEADERS));
+                String headers = objectMapper.writeValueAsString(request.getParameters().get(Parameter.KEY_HTTP_HEADERS));
                 params.add(Parameter.builder()
                         .reference(request.getServiceInstanceId())
-                        .key(PARAMETER_KEY_HTTP_HEADERS)
+                        .key(Parameter.KEY_HTTP_HEADERS)
                         .value(headers)
                         .build());
             } catch (JsonProcessingException e) {
@@ -187,7 +180,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
                 String headers = objectMapper.writeValueAsString(new String[]{});
                 params.add(Parameter.builder()
                         .reference(request.getServiceInstanceId())
-                        .key(PARAMETER_KEY_HTTP_HEADERS)
+                        .key(Parameter.KEY_HTTP_HEADERS)
                         .value(headers)
                         .build());
             } catch (JsonProcessingException e) {
@@ -196,23 +189,23 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         }
 
         // ssl enabled
-        if (request.getParameters().containsKey(PARAMETER_KEY_SSL_ENABLED)) {
+        if (request.getParameters().containsKey(Parameter.KEY_SSL_ENABLED)) {
             params.add(Parameter.builder()
                     .reference(request.getServiceInstanceId())
-                    .key(PARAMETER_KEY_SSL_ENABLED)
-                    .value(request.getParameters().get(PARAMETER_KEY_SSL_ENABLED).toString())
+                    .key(Parameter.KEY_SSL_ENABLED)
+                    .value(request.getParameters().get(Parameter.KEY_SSL_ENABLED).toString())
                     .build());
         } else {
             params.add(Parameter.builder()
                     .reference(request.getServiceInstanceId())
-                    .key(PARAMETER_KEY_SSL_ENABLED)
+                    .key(Parameter.KEY_SSL_ENABLED)
                     .value(Boolean.TRUE.toString())
                     .build());
         }
 
         params.add(Parameter.builder()
             .reference(request.getServiceInstanceId())
-            .key(PARAMETER_KEY_LAST_CALL)
+            .key(Parameter.KEY_LAST_CALL)
             .value("0")
             .build());
 
@@ -220,7 +213,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     }
 
     private void checkMandatoryParams(CreateServiceInstanceRequest request) {
-        for (String mp: MANDATORY_PARAMETERS) {
+        for (String mp: Parameter.MANDATORY_PARAMETERS) {
             if (!request.getParameters().keySet().contains(mp)) {
                 throw new RuntimeException(
                         String.format("Request for service instance %s does not contain parameter %s",
@@ -230,7 +223,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     }
 
     private void validateUrl(CreateServiceInstanceRequest request) {
-        String urlValue = request.getParameters().get(PARAMETER_KEY_URL).toString();
+        String urlValue = request.getParameters().get(Parameter.KEY_URL).toString();
         try {
             new URL(urlValue);
         } catch (MalformedURLException e) {
@@ -243,13 +236,12 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     }
 
     private void validateTime(CreateServiceInstanceRequest request){
-        String value = request.getParameters().get(TimeParameterValidator.KEY_FIXED_DELAY).toString();
-        TimeParameterValidator.validateParameterValue(value);
+        TimeParameterValidator.validateParameterValue(request.getParameters());
     }
 
     private void validateHttpMethod(CreateServiceInstanceRequest request){
-        if (request.getParameters().containsKey(PARAMETER_KEY_HTTP_METHOD)) {
-            String value = request.getParameters().get(PARAMETER_KEY_HTTP_METHOD).toString();
+        if (request.getParameters().containsKey(Parameter.KEY_HTTP_METHOD)) {
+            String value = request.getParameters().get(Parameter.KEY_HTTP_METHOD).toString();
             if (!Arrays.asList(HttpMethod.values()).stream().anyMatch(v -> v.toString().equals(value))) {
                 throw new RuntimeException(String.format("%s is no supported http method", value));
             }
@@ -257,12 +249,12 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     }
 
     private void validateHttpHeaders(CreateServiceInstanceRequest request){
-        if (request.getParameters().containsKey(PARAMETER_KEY_HTTP_HEADERS)) {
-            Object paramValues = request.getParameters().get(PARAMETER_KEY_HTTP_HEADERS);
+        if (request.getParameters().containsKey(Parameter.KEY_HTTP_HEADERS)) {
+            Object paramValues = request.getParameters().get(Parameter.KEY_HTTP_HEADERS);
             if (!(paramValues instanceof String[])) {
                 throw new RuntimeException(
                         String.format("Optional Parameter %s does not support type %s as value.",
-                                PARAMETER_KEY_HTTP_HEADERS, paramValues.getClass().getSimpleName()));
+                                Parameter.KEY_HTTP_HEADERS, paramValues.getClass().getSimpleName()));
             }
 
             for(String header: (String[])paramValues) {
@@ -279,10 +271,10 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     }
 
     private boolean isTimeExpired(List<Parameter> params) {
-        Parameter pLastCall = params.stream().filter(p -> p.getKey().equals(PARAMETER_KEY_LAST_CALL)).findFirst().get();
+        Parameter pLastCall = params.stream().filter(p -> p.getKey().equals(Parameter.KEY_LAST_CALL)).findFirst().get();
         long lastCallTime = Long.valueOf(pLastCall.getValue());
-        Parameter pTimeSpan = params.stream().filter(p -> p.getKey().equals(TimeParameterValidator.KEY_FIXED_DELAY)).findFirst().get();
-        long timeSpan = TimeParameterValidator.getTimeInMilliSecFromParameterValue(pTimeSpan.getValue());
+        Parameter pTimeSpan = params.stream().filter(p -> p.getKey().equals(Parameter.KEY_FIXED_DELAY)).findFirst().get();
+        long timeSpan = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(pTimeSpan.getValue());
         long currentTime = System.currentTimeMillis();
         log.debug("lastCallTime: {}, timeSpan: {}, currentTime: {}", lastCallTime, timeSpan, currentTime);
         return (System.currentTimeMillis() - lastCallTime) > timeSpan;

@@ -1,37 +1,69 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
+import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
+import org.springframework.web.servlet.tags.Param;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class TimeParameterValidator {
 
-    public static final String KEY_FIXED_DELAY = "fixedDelay";
+    private static final ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+
     public static final String DEFAULT_VALUE = "8h";
 
     public static final boolean doesNotContainOrValidTimeParameter(Map<String,Object> map) {
         return !containsTimeParameter(map) || validateParameterValue(map);
     }
 
+    /**
+     * Checks if parameters contain one of the parameters.
+     * @param parameters
+     * @return
+     */
     public static final boolean containsTimeParameter(Map<String,Object> parameters) {
-        return parameters.containsKey(KEY_FIXED_DELAY);
+        return  getContainedTimeParameter(parameters) != null;
+    }
+
+    public static final String getContainedTimeParameter(Map<String,Object> parameters) {
+        if (parameters.containsKey(Parameter.KEY_FIXED_DELAY)) return Parameter.KEY_FIXED_DELAY;
+        else if (parameters.containsKey(Parameter.KEY_TIMES)) return Parameter.KEY_TIMES;
+        else return null;
+    }
+
+    public static final String getContainedTimeParameter(List<Parameter> parameters) {
+        if (parameters.stream().anyMatch(p -> p.getKey().equals(Parameter.KEY_FIXED_DELAY))) return Parameter.KEY_FIXED_DELAY;
+        else if (parameters.stream().anyMatch(p -> p.getKey().equals(Parameter.KEY_TIMES))) return Parameter.KEY_TIMES;
+        else return null;
     }
 
     public static final boolean validateParameterValue(Map<String,Object> parameters) {
-        if (!containsTimeParameter(parameters)) return  false;
-        return validateParameterValue(parameters.get(KEY_FIXED_DELAY).toString());
+        String key = getContainedTimeParameter(parameters);
+        if(Parameter.KEY_FIXED_DELAY.equals(key)) {
+            return validateFixedDelayParameterValue(parameters.get(key).toString());
+        } else if (Parameter.KEY_TIMES.equals(key)) {
+            try {
+                return validateTimesParameterValue(objectMapper.readValue(parameters.get(key).toString(), String[].class));
+            } catch (Throwable e) {
+                return false;
+            }
+        } else {
+            return  false;
+        }
     }
 
     public static final String getParameterTime(Map<String,Object> parameters, String defaultTime) {
         if (!containsTimeParameter(parameters)) return defaultTime;
         if (!validateParameterValue(parameters)) throw new RuntimeException();
-        return formattingAndCleaning(parameters.get(KEY_FIXED_DELAY).toString());
+        return formattingAndCleaning(parameters.get(Parameter.KEY_FIXED_DELAY).toString());
     }
 
     public static final String getParameterTime(CreateServiceInstanceRequest request, String defaultTime) {
@@ -42,23 +74,41 @@ public class TimeParameterValidator {
         return getParameterTime(request.getParameters(), defaultTime);
     }
 
-    public static final long getTimeInMilliSecFromParameterValue(Map<String,Object> parameters, String defaultTime) {
+    public static final long getFixedDelayInMilliSecFromParameterValue(Map<String,Object> parameters, String defaultTime) {
         String time = defaultTime;
-        if (containsTimeParameter(parameters)) time = parameters.get(KEY_FIXED_DELAY).toString();
-        return getTimeInMilliSecFromParameterValue(time);
+        if (containsTimeParameter(parameters)) time = parameters.get(Parameter.KEY_FIXED_DELAY).toString();
+        return getFixedDelayInMilliSecFromParameterValue(time);
     }
 
-    public static final boolean validateParameterValue(String parameterValue) {
+    public static final boolean validateFixedDelayParameterValue(String parameterValue) {
         long time;
 
         try {
-            time = getTimeInMilliSecFromParameterValue(parameterValue);
+            time = getFixedDelayInMilliSecFromParameterValue(parameterValue);
         } catch (Throwable e) {
             log.error("Error in validating time parameter.", e);
             return  false;
         }
-
         return time > 0;
+    }
+
+    /**
+     * Checks if parameter values are valid
+     * @param parameterValues must be an array of times like ["14:53", "1:23"]
+     * @return
+     */
+    public static final boolean validateTimesParameterValue(String[] parameterValues) {
+        for (String time: parameterValues) {
+            if (time.length() > 5 || time.length() < 3) return false;
+            if (!time.contains(":")) return false;
+            if (time.indexOf(':') != time.lastIndexOf(':')) return false;
+            int hours = Integer.valueOf(time.split(":")[0]);
+            int minutes = Integer.valueOf(time.split(":")[1]);
+            if (hours < 0 || hours > 24) return false;
+            if (minutes < 0 || minutes >= 60) return false;
+            if (hours == 24 && minutes > 0) return false;
+        }
+        return true;
     }
 
     /**
@@ -66,13 +116,54 @@ public class TimeParameterValidator {
      * @param parameterValue is e.g. "1w 3d 5h 2m 23s"
      * @return
      */
-    public static final long getTimeInMilliSecFromParameterValue(String parameterValue) {
+    public static final long getFixedDelayInMilliSecFromParameterValue(String parameterValue) {
         long time = 0;
 
         List<String> timeSections = Arrays.asList(formattingAndCleaning(parameterValue).split(" "));
         for (String s : timeSections) time += getTimeSection(s);
 
         return time;
+    }
+
+    public static final long getFixedDelayInSecFromParameterValue(String parameterValue) {
+        return getFixedDelayInMilliSecFromParameterValue(parameterValue) / 1000;
+    }
+
+    public static boolean isExpired(List<Parameter> parameters, long uptimeInSec) throws IOException {
+        String key = getContainedTimeParameter(parameters);
+        if (Parameter.KEY_TIMES.equals(key)) {
+            return isTimesExpired(parameters);
+        } else if (Parameter.KEY_FIXED_DELAY.equals(key)) {
+            return isFixedDelayExpired(parameters, uptimeInSec);
+        }
+        return false;
+    }
+
+    public static boolean isFixedDelayExpired(List<Parameter> parameters, long uptimeInSec) {
+        String time = Parameter.getParameterValueByKey(parameters, Parameter.KEY_FIXED_DELAY);
+        long fixedDeplayInSec = getFixedDelayInSecFromParameterValue(time);
+        return uptimeInSec > fixedDeplayInSec;
+    }
+
+    public static boolean isTimesExpired(List<Parameter> parameters) throws IOException {
+        String[] times = objectMapper.readValue(Parameter.getParameterValueByKey(parameters, Parameter.KEY_TIMES), String[].class);
+        for (String timeStr: times) {
+            int hour = Integer.valueOf(timeStr.split(":")[0]);
+            int min = Integer.valueOf(timeStr.split(":")[1]);
+            long lastCallInSec = Long.valueOf( Parameter.getParameterValueByKey(parameters, Parameter.KEY_LAST_CALL) ) / 1000;
+            if (isTimeExpired(System.currentTimeMillis(), hour, min, lastCallInSec)) return true;
+        }
+        return false;
+    }
+
+    public static boolean isTimeExpired(long currentTime, int hourTime, int minTime, long lastCall) {
+        int lcHour = new Date(lastCall).getHours();
+        int lcMin = new Date(lastCall).getMinutes();
+        int nowHour = new Date(currentTime).getHours();
+        int nowMin = new Date(currentTime).getMinutes();
+        boolean laterThanDefinedTime = (nowHour * 60 + nowMin ) > (hourTime * 60 + minTime );
+        boolean lastCallEarlierThanDefinedTime = (lcHour * 60 + lcMin ) < (hourTime * 60 + minTime );
+        return laterThanDefinedTime && lastCallEarlierThanDefinedTime;
     }
 
     private static String formattingAndCleaning(String parameterValue) {

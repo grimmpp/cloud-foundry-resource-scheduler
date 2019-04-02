@@ -2,7 +2,6 @@ package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Application;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Resource;
-import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Binding;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.ServiceInstance;
@@ -25,8 +24,8 @@ public abstract class IServicePlanBasedOnAppBinding extends IServicePlanBasedOnS
             Resource<Application> app = cfClient.getResource(appUrl, Application.class);
             log.trace("App data: {}", objectMapper.writeValueAsString(app));
 
-            Parameter p = pRepo.findByReferenceAndKey(b.getBindingId(), TimeParameterValidator.KEY_FIXED_DELAY);
-            long time = TimeParameterValidator.getTimeInMilliSecFromParameterValue(p.getValue());
+            Parameter p = pRepo.findByReferenceAndKey(b.getBindingId(), Parameter.KEY_FIXED_DELAY);
+            long time = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(p.getValue());
             long timeInSec = time / 1000;
             log.debug("Time: parameter value: {}, milli sec: {}", p.getValue(), timeInSec);
 
