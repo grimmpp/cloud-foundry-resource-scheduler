@@ -82,10 +82,31 @@ public class TimeParameterValidator {
         value = value.replaceAll(";", "");
         value = value.replaceAll("_", "");
         value = value.replaceAll("-", "");
+
+        value = value.replaceAll("weeks", "w");
+        value = value.replaceAll("week", "w");
+
+        value = value.replaceAll("days", "d");
+        value = value.replaceAll("day", "d");
+
+        value = value.replaceAll("hours", "h");
+        value = value.replaceAll("hour", "h");
+
+        value = value.replaceAll("minutes", "m");
+        value = value.replaceAll("minute", "m");
+        value = value.replaceAll("mins", "m");
+        value = value.replaceAll("min", "m");
+
+        value = value.replaceAll("seconds", "s");
+        value = value.replaceAll("second", "s");
+        value = value.replaceAll("secs", "s");
+        value = value.replaceAll("sec", "s");
+
+
         value = value.replaceAll("w", "w ");
-        value = value.replaceAll("d", "d ");
         value = value.replaceAll("h", "h ");
         value = value.replaceAll("m", "m ");
+        value = value.replaceAll("d", "d ");
         value = value.replaceAll("s", "s ");
         while(value.contains("  ")) value = value.replaceAll("  ", " ");
 

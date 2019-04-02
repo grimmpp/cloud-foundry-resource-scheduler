@@ -47,6 +47,18 @@ public class TimeParameterValidatorTest {
 
         b = TimeParameterValidator.validateParameterValue("1w1d; 1h - 1m_ 1s");
         Assert.assertTrue(b);
+
+        b = TimeParameterValidator.validateParameterValue("1week 2hour 5min 3sec");
+        Assert.assertTrue(b);
+
+        b = TimeParameterValidator.validateParameterValue("1weeks 2hours 5mins 3secs");
+        Assert.assertTrue(b);
+
+        b = TimeParameterValidator.validateParameterValue("5Minutes 3Seconds");
+        Assert.assertTrue(b);
+
+        b = TimeParameterValidator.validateParameterValue("5MinuTe 3Second");
+        Assert.assertTrue(b);
     }
 
     @Test
