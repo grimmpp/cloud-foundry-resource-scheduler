@@ -17,7 +17,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 * **HttpEndpointScheduler**: Triggers frequently arbitrary http endpoints after a defined periode of time.
 * **Planned Service Plans**
   * **RollingContainerRestarter**: Restart of an application whinout downtime.
-  * Exctention of **HttpEndpointScheduler**: Add ability to do http calls at specific times e.g. at 5pm.
+  * Extention of schedulers: Add ability to do http calls at specific times e.g. at 5pm.
 
 ## Technical data
 * Used Spring Cloud Open **Service Broker API**
