@@ -168,7 +168,7 @@ public class TimeParameterValidatorTest {
     }
 
     @Test
-    public void isTimesExpiredTest() throws IOException, ParseException {
+    public void isTimesExpiredTest() throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("H:m dd-MM-yyyy");
         Date date = formatter.parse("12:30 03-04-2019");
 
@@ -179,16 +179,47 @@ public class TimeParameterValidatorTest {
         boolean b = false;
 
         // lastCall < defined time < current time
+        lastCall = date.getTime() - 60 * 1000;
+        currentTime = date.getTime() + 60 * 1000;
         b = TimeParameterValidator.isTimeExpired(currentTime, nowHour, nowMin, lastCall); // doesn't matter for this case
         Assert.assertTrue(b);
 
-        //  defined time < lastCall < current time
-        lastCall = currentTime - 30 * 1000;
+        // lastCall < defined time = current time
+        lastCall = date.getTime() - 60 * 1000;
+        currentTime = date.getTime();
+        b = TimeParameterValidator.isTimeExpired(currentTime, nowHour, nowMin, lastCall); // doesn't matter for this case
+        Assert.assertTrue(b);
+
+        // defined time < lastCall < current time
+        lastCall = date.getTime() + 60 + 1000;
+        currentTime = lastCall + 60 * 1000;
         b = TimeParameterValidator.isTimeExpired(currentTime, nowHour, nowMin, lastCall); // doesn't matter for this case
         Assert.assertTrue(!b);
 
-        //  defined time < current time < lastCall
-        lastCall = currentTime + 30 * 1000;
+        // This is not possible in reality
+        // current time < lastCall < defined time
+        lastCall = date.getTime() - 60 * 1000;
+        currentTime = lastCall - 60 * 1000;
+        b = TimeParameterValidator.isTimeExpired(currentTime, nowHour, nowMin, lastCall); // doesn't matter for this case
+        Assert.assertTrue(!b);
+
+        // This is not possible in reality
+        // current time < defined time < lastCall
+        currentTime = date.getTime() - 60 * 1000;
+        lastCall = date.getTime() + 60 * 1000;
+        b = TimeParameterValidator.isTimeExpired(currentTime, nowHour, nowMin, lastCall); // doesn't matter for this case
+        Assert.assertTrue(!b);
+
+        // This is not possible in reality
+        // defined time < current time < lastCall
+        currentTime = date.getTime() + 60 *1000;
+        lastCall = currentTime + 60 * 1000;
+        b = TimeParameterValidator.isTimeExpired(currentTime, nowHour, nowMin, lastCall); // doesn't matter for this case
+        Assert.assertTrue(!b);
+
+        // lastCall < current time < defined time
+        currentTime = date.getTime() - 60 * 1000;
+        lastCall = currentTime - 60 * 1000;
         b = TimeParameterValidator.isTimeExpired(currentTime, nowHour, nowMin, lastCall); // doesn't matter for this case
         Assert.assertTrue(!b);
     }

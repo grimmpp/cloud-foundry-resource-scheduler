@@ -161,7 +161,7 @@ public class TimeParameterValidator {
         int lcMin = new Date(lastCall).getMinutes();
         int nowHour = new Date(currentTime).getHours();
         int nowMin = new Date(currentTime).getMinutes();
-        boolean laterThanDefinedTime = (nowHour * 60 + nowMin ) > (hourTime * 60 + minTime );
+        boolean laterThanDefinedTime = (nowHour * 60 + nowMin ) >= (hourTime * 60 + minTime );
         boolean lastCallEarlierThanDefinedTime = (lcHour * 60 + lcMin ) < (hourTime * 60 + minTime );
         return laterThanDefinedTime && lastCallEarlierThanDefinedTime;
     }
