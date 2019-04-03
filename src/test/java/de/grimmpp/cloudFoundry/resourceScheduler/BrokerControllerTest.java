@@ -71,10 +71,9 @@ public class BrokerControllerTest {
         Assert.assertEquals(spaceId, si.getSpaceId());
 
         List<Parameter> parameterList = parameterRepository.findByReference(siId);
-        Assert.assertEquals(1, parameterList.size());
+        Assert.assertEquals(2, parameterList.size());
         Assert.assertEquals(siId, parameterList.get(0).getReference());
-        Assert.assertEquals(Parameter.KEY_FIXED_DELAY, parameterList.get(0).getKey());
-        Assert.assertEquals(time, parameterList.get(0).getValue());
+        Assert.assertEquals(time, Parameter.getParameterValueByKey(parameterList, Parameter.KEY_FIXED_DELAY));
     }
 
     @Test
@@ -112,8 +111,7 @@ public class BrokerControllerTest {
         List<Parameter> parameterList = parameterRepository.findByReference(bId);
         Assert.assertEquals(1, parameterList.size());
         Assert.assertEquals(bId, parameterList.get(0).getReference());
-        Assert.assertEquals(Parameter.KEY_FIXED_DELAY, parameterList.get(0).getKey());
-        Assert.assertEquals(time, parameterList.get(0).getValue());
+        Assert.assertEquals(time, Parameter.getParameterValueByKey(parameterList, Parameter.KEY_FIXED_DELAY));
     }
 
     @Test

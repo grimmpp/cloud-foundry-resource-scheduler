@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
+import org.springframework.web.servlet.tags.Param;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,6 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Data
@@ -96,7 +98,9 @@ public class Parameter implements Serializable {
     }
 
     public static Parameter getParameterByKey(List<Parameter> params, String key) {
-        return params.stream().filter(p -> p.getKey().equals(key)).findFirst().get();
+        Optional<Parameter> parameter = params.stream().filter(p -> p.getKey().equals(key)).findFirst();
+        if (!parameter.isPresent()) return null;
+        else return parameter.get();
     }
 
     public static String getParameterValueByKey(List<Parameter> params, String key) {

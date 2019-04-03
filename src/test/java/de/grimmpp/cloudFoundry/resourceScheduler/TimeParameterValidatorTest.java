@@ -144,6 +144,12 @@ public class TimeParameterValidatorTest {
 
         b = TimeParameterValidator.validateTimesParameterValue(new String[]{"1:1:5"});
         Assert.assertTrue(!b);
+
+        b = TimeParameterValidator.validateTimesParameterValue(new String[]{});
+        Assert.assertTrue(!b);
+
+        b = TimeParameterValidator.validateTimesParameterValue(null);
+        Assert.assertTrue(!b);
     }
 
     @Test

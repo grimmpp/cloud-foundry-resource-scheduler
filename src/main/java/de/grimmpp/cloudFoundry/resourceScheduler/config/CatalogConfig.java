@@ -30,7 +30,7 @@ public class CatalogConfig {
                                     .description("Triggers defined http endpoint after a defined time. After the scheduler triggered all endpoints it will pause for 30 sec.")
                                     .metadata("bullets", new String[]{
                                         "Client timeout for the scheduler is set to 500 milli sec. The scheduler is NOT evaluating and is NOT waiting for a response.",
-                                        "Either 'fixedDelay' or 'times' must be chosen as parameter. Both parameters are exclusive.",
+                                        "Either 'fixedDelay' or 'times' must be chosen as parameter. Both parameters are exclusive and one of them must be set.",
                                         "Exclusive Parameter \"{\"fixedDelay\": \"1w 3d 2h 5min\"}\" (w=week, d=day, h=hour, m=minute) is a time period of time after which the trigger starts.",
                                         "Exclusive Parameter \"{\"times\": [\"09:05\", \"12:05\", \"15:05\", \"20:05\"] is a list of points in time [hour:min]. When one of those times are reached then the trigger starts.",
                                         "Mandatory git Parameter \"{\"url\": \"https://full-url.com\"}\" is the url which will be triggered.",
@@ -61,7 +61,15 @@ public class CatalogConfig {
                             Plan.builder()
                                     .id(ServicePlanSwitchOffAppsInSpace.PLAN_ID)
                                     .name("SwitchOffAppsInSpace")
-                                    .description("Stops all apps after a defined time in the space where this service plan is instanced, except in spaces which contain prod in the name in order to avoid downtime of apps in productive spaces. ")
+                                    .description("Stops all apps after a defined time (fixed delay) or defined points in time in the space where this service plan is instanced. " +
+                                            "Space which contain prod in their name will be ignored in order to avoid downtime of apps in productive spaces. " +
+                                            "Apps will be stopped regarding their last updated state of their desired state in their configuration in Cloud Foundry. " +
+                                            "Each app will be checked individually and stopped when the specified time matches.")
+                                    .metadata("bullets", new String[]{
+                                            "Either 'fixedDelay' or 'times' must be chosen as parameter. Both parameters are exclusive and one of them must be set.",
+                                            "Exclusive Parameter \"{\"fixedDelay\": \"1w 3d 2h 5min\"}\" (w=week, d=day, h=hour, m=minute) is a time period of time after which the app will be stopped.",
+                                            "Exclusive Parameter \"{\"times\": [\"09:05\", \"12:05\", \"15:05\", \"20:05\"] is a list of points in time [hour:min]. When one of those times are reached then the app will be stopped.",
+                                    })
                                     .bindable(false)
                                     .free(true)
                                     .build()

@@ -1,5 +1,7 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.mocks.CfApiMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.AppManagerApplication;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
@@ -23,6 +25,8 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { AppManagerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class ServicePlanSwitchOffAppsInSpaceTest {
+
+    private static ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     @Autowired
     private Catalog catalog;
@@ -59,6 +63,34 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
                 .build();
 
         pRepo.save(new Parameter(siid, Parameter.KEY_FIXED_DELAY, "5m"));
+
+        // execute logic to test
+        servicePlan.performActionForServiceInstance(si);
+
+        // Check last call which stopped the app
+        String httpMethod = cfApiMockController.getLastOperation(CfApiMockController.KEY_HTTP_METHOD);
+        Assert.assertEquals(RequestMethod.PUT.toString(), httpMethod);
+
+        String url = "/v2/apps/15b3885d-0351-4b9b-8697-86641668c123";
+        Assert.assertEquals(url, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
+
+        String requestBody = "{\"state\": \"STOPPED\"}";
+        Assert.assertEquals(requestBody, cfApiMockController.getLastOperation(CfApiMockController.KEY_REQUEST_BODY));
+    }
+
+    @Test
+    public void stopAllAppsAtASpecificTimeTest() throws IOException {
+        ServiceInstance si = ServiceInstance.builder()
+                .serviceInstanceId(siid)
+                .spaceId(spaceId)
+                .build();
+
+        long hours = TimeParameterValidator.getHours(System.currentTimeMillis());
+        long minutes = TimeParameterValidator.getMinutes(System.currentTimeMillis()-60*1000); //-1min
+        String[] timesStr = new String[]{ hours+":"+minutes };
+
+        pRepo.save(new Parameter(siid, Parameter.KEY_TIMES, objectMapper.writeValueAsString(timesStr)));
+        pRepo.save(new Parameter(siid, Parameter.KEY_LAST_CALL, "0"));
 
         // execute logic to test
         servicePlan.performActionForServiceInstance(si);

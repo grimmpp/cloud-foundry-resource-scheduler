@@ -125,6 +125,8 @@ public class TimeParameterValidator {
      * @return
      */
     public static final boolean validateTimesParameterValue(String[] parameterValues) {
+        if (parameterValues == null) return false;
+        if (parameterValues.length == 0) return  false;
         for (String time: parameterValues) {
             if (time.length() > 5 || time.length() < 3) return false;
             if (!time.contains(":")) return false;

@@ -11,6 +11,7 @@ import org.springframework.cloud.servicebroker.model.instance.CreateServiceInsta
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -34,16 +35,12 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
 
             for (Resource<Application> app : apps) {
 
-                long currentTime = System.currentTimeMillis();
                 if (app.getEntity().getState().equals("STARTED")) {
                     String logLine = String.format("app: %s, space: %s because of serviceInstance: %s",
                             app.getMetadata().getGuid(), si.getSpaceId(), si.getServiceInstanceId());
 
-                    Parameter p = pRepo.findByReferenceAndKey(si.getServiceInstanceId(), Parameter.KEY_FIXED_DELAY);
-                    long time = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(p.getValue());
-
-                    long timeDiff = currentTime - app.getMetadata().getUpdated_at().getTime();
-                    if (timeDiff > time) {
+                    long lastModified = app.getMetadata().getUpdated_at().getTime();
+                    if (isExpired(si, lastModified)) {
                         try {
                             String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, app.getMetadata().getGuid());
                             cfClient.updateResource(appUrl, "{\"state\": \"STOPPED\"}", Application.class);
@@ -52,6 +49,8 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
                         } catch (Throwable e) {
                             log.error("Cannot stop " + logLine, e);
                         }
+
+                        storeLastCall(si);
                     } else {
                         log.debug("App {} is not expired. Last app update: {}", app.getMetadata().getGuid(), app.getMetadata().getUpdated_at());
                     }
@@ -65,6 +64,40 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
         }
     }
 
+    private boolean isExpired(ServiceInstance si, long lastAppUpdateInMilliSec) throws IOException {
+        boolean isExpired = false;
+
+        List<Parameter> params = pRepo.findByReference(si.getServiceInstanceId());
+        String timeKey = TimeParameterValidator.getContainedTimeParameter(params);
+
+        if (Parameter.KEY_FIXED_DELAY.equals(timeKey)) {
+            long currentTime = System.currentTimeMillis();
+            String pValue = Parameter.getParameterValueByKey(params, timeKey);
+            long fixedDelay = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(pValue);
+            long timeDiff = currentTime - lastAppUpdateInMilliSec;
+            isExpired = timeDiff > fixedDelay;
+        }
+        else if (Parameter.KEY_TIMES.equals(timeKey)){
+            isExpired = TimeParameterValidator.isTimesExpired(params);
+        }
+
+        return isExpired;
+    }
+
+    private void storeLastCall(ServiceInstance si) {
+        // Remember last http call made.
+        List<Parameter> params = pRepo.findByReference(si.getServiceInstanceId());
+        Parameter p = Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL);
+        if (p==null) {
+            p = Parameter.builder()
+                    .reference(si.getServiceInstanceId())
+                    .key(Parameter.KEY_LAST_CALL)
+                    .build();
+        }
+        p.setValue(Long.toString(System.currentTimeMillis()));
+        pRepo.save(p);
+    }
+
     @Override
     public String getServicePlanId() {
         return PLAN_ID;
@@ -72,14 +105,21 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
 
     @Override
     public void saveRequestParamters(CreateServiceInstanceRequest request) {
-        // requires parameter "fixedDelay"
-        String time = TimeParameterValidator.getParameterFixedDelay(request, TimeParameterValidator.DEFAULT_VALUE);
-        pRepo.save(
-                Parameter.builder()
-                        .reference(request.getServiceInstanceId())
-                        .key(Parameter.KEY_FIXED_DELAY)
-                        .value(time)
-                        .build());
+        if (!TimeParameterValidator.validateParameterValue(request.getParameters())) {
+            throw new RuntimeException("Invalid time parameters.");
+        }
+
+        List<Parameter> params = new ArrayList<>();
+
+        params.add(TimeParameterValidator.getTimeParameter(request));
+
+        params.add(Parameter.builder()
+                .reference(request.getServiceInstanceId())
+                .key(Parameter.KEY_LAST_CALL)
+                .value("0")
+                .build());
+
+        pRepo.saveAll(params);
     }
 
     @Override

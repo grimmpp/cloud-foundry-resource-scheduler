@@ -127,7 +127,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     @Override
     public void saveRequestParamters(CreateServiceInstanceRequest request) {
         validateUrl(request);
-        if (!validateTime(request)) {
+        if (!TimeParameterValidator.validateParameterValue(request.getParameters())) {
             throw new RuntimeException("Invalid time parameters.");
         }
 
@@ -224,10 +224,6 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         if (!(urlValue.startsWith("http://") || urlValue.startsWith("https://"))) {
             throw new RuntimeException("Parameter url must start either with 'http://' or 'https://'");
         }
-    }
-
-    private boolean validateTime(CreateServiceInstanceRequest request){
-        return TimeParameterValidator.validateParameterValue(request.getParameters());
     }
 
     private void validateHttpMethod(CreateServiceInstanceRequest request){
