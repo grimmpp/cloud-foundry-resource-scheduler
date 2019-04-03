@@ -35,7 +35,7 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
     @Override
     public void saveRequestParamters(CreateServiceInstanceBindingRequest request) {
         // requires parameter "fixedDelay"
-        String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
+        String time = TimeParameterValidator.getParameterFixedDelay(request, TimeParameterValidator.DEFAULT_VALUE);
         pRepo.save(
                 Parameter.builder()
                         .reference(request.getServiceInstanceId())

@@ -87,8 +87,9 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         List<Parameter> params = pRepo.findByReference(si.getServiceInstanceId());
 
         if (isTimeExpired(params)) {
-            String time = Parameter.getParameterValueByKey(params, Parameter.KEY_FIXED_DELAY);
-            log.debug("time is expired after {} milli sec.", time);
+            String timeKey = TimeParameterValidator.getContainedTimeParameter(params);
+            String time = Parameter.getParameterValueByKey(params, timeKey);
+            log.debug("Time is expired after -> mode: '{}' parameter: {}.", timeKey, time);
             try {
                 HttpHeaders headers = new HttpHeaders();
                 String headersStr = Parameter.getParameterValueByKey(params, Parameter.KEY_HTTP_HEADERS);
@@ -125,9 +126,10 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
 
     @Override
     public void saveRequestParamters(CreateServiceInstanceRequest request) {
-        checkMandatoryParams(request);
         validateUrl(request);
-        validateTime(request);
+        if (!validateTime(request)) {
+            throw new RuntimeException("Invalid time parameters.");
+        }
 
         validateHttpMethod(request);
         validateHttpHeaders(request);
@@ -141,12 +143,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
                 .build());
 
         // time
-        String time = TimeParameterValidator.getParameterTime(request, TimeParameterValidator.DEFAULT_VALUE);
-        params.add(Parameter.builder()
-                .reference(request.getServiceInstanceId())
-                .key(Parameter.KEY_FIXED_DELAY)
-                .value(request.getParameters().get(Parameter.KEY_FIXED_DELAY).toString())
-                .build());
+        params.add(TimeParameterValidator.getTimeParameter(request));
 
         // http method
         if (request.getParameters().containsKey(Parameter.KEY_HTTP_METHOD)) {
@@ -212,17 +209,11 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         pRepo.saveAll(params);
     }
 
-    private void checkMandatoryParams(CreateServiceInstanceRequest request) {
-        for (String mp: Parameter.MANDATORY_PARAMETERS) {
-            if (!request.getParameters().keySet().contains(mp)) {
-                throw new RuntimeException(
-                        String.format("Request for service instance %s does not contain parameter %s",
-                                request.getServiceInstanceId(), mp));
-            }
-        }
-    }
-
     private void validateUrl(CreateServiceInstanceRequest request) {
+        if (!request.getParameters().containsKey(Parameter.KEY_URL)) {
+            throw new RuntimeException("Mandatory Parameter url is not contained.");
+        }
+
         String urlValue = request.getParameters().get(Parameter.KEY_URL).toString();
         try {
             new URL(urlValue);
@@ -235,8 +226,8 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         }
     }
 
-    private void validateTime(CreateServiceInstanceRequest request){
-        TimeParameterValidator.validateParameterValue(request.getParameters());
+    private boolean validateTime(CreateServiceInstanceRequest request){
+        return TimeParameterValidator.validateParameterValue(request.getParameters());
     }
 
     private void validateHttpMethod(CreateServiceInstanceRequest request){
@@ -270,13 +261,23 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         }
     }
 
-    private boolean isTimeExpired(List<Parameter> params) {
-        Parameter pLastCall = params.stream().filter(p -> p.getKey().equals(Parameter.KEY_LAST_CALL)).findFirst().get();
-        long lastCallTime = Long.valueOf(pLastCall.getValue());
-        Parameter pTimeSpan = params.stream().filter(p -> p.getKey().equals(Parameter.KEY_FIXED_DELAY)).findFirst().get();
-        long timeSpan = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(pTimeSpan.getValue());
+    private boolean isTimeExpired(List<Parameter> params) throws IOException {
+        boolean isExpired = false;
+        String key = TimeParameterValidator.getContainedTimeParameter(params);
+
+        long lastCallTime = Long.valueOf(Parameter.getParameterValueByKey(params, Parameter.KEY_LAST_CALL));
         long currentTime = System.currentTimeMillis();
-        log.debug("lastCallTime: {}, timeSpan: {}, currentTime: {}", lastCallTime, timeSpan, currentTime);
-        return (System.currentTimeMillis() - lastCallTime) > timeSpan;
+
+        if (Parameter.KEY_FIXED_DELAY.equals(key)) {
+            long fixedDelayInMilliSec = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(params);
+            isExpired = (currentTime - lastCallTime) > fixedDelayInMilliSec;
+            log.debug("IsExpired {}, fixedDelay: {} milli sec, lastCall: {} milli sec, currentTime: {} milli sec",
+                    isExpired, fixedDelayInMilliSec, lastCallTime, currentTime);
+
+        } else if (Parameter.KEY_TIMES.equals(key)) {
+            isExpired = TimeParameterValidator.isTimesExpired(params);
+        }
+
+        return isExpired;
     }
 }

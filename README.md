@@ -14,10 +14,9 @@ Both parts, Service Broker and Scheduler, is contained within the same applicati
 For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundry/resourceScheduler/config/CatalogConfig.java">catalog</a> file.
 * **AppRestarter**: Restarts frequently a bound app after a defined time completely. (All instances at the same time) 
 * **SwitchOffAppsInSpace**: Switches off all apps after a defined time in a space which doesn't contain prod in the name. (No bindings needed) This plan can be used for test and demo spaces in order to save resources from the quota.
-* **HttpEndpointScheduler**: Triggers frequently arbitrary http endpoints after a defined periode of time.
+* **HttpEndpointScheduler**: Triggers frequently arbitrary http endpoints after a defined periode of time or for specific points in time e.g. 5pm.
 * **Planned Service Plans**
   * **RollingContainerRestarter**: Restart of an application whinout downtime.
-  * Extention of schedulers: Add ability to do http calls at specific times e.g. at 5pm.
 
 ## Technical data
 * Used Spring Cloud Open **Service Broker API**

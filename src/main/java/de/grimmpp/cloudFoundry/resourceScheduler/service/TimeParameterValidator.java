@@ -7,11 +7,11 @@ import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.instance.CreateServiceInstanceRequest;
-import org.springframework.web.servlet.tags.Param;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class TimeParameterValidator {
@@ -39,6 +39,27 @@ public class TimeParameterValidator {
         else return null;
     }
 
+    public static final Parameter getTimeParameter(CreateServiceInstanceRequest request) {
+        String key = getContainedTimeParameter(request.getParameters());
+
+        Parameter p = Parameter.builder()
+                .reference(request.getServiceInstanceId())
+                .key(key)
+                .build();
+
+        if (key.equals(Parameter.KEY_FIXED_DELAY)) {
+            p.setValue(request.getParameters().get(key).toString());
+        } else if (key.equals(Parameter.KEY_TIMES)) {
+            try {
+                p.setValue(objectMapper.writeValueAsString(request.getParameters().get(key)));
+            } catch (Throwable e) {
+                throw new RuntimeException("Was not able to read parameter times.", e);
+            }
+        }
+
+        return p;
+    }
+
     public static final String getContainedTimeParameter(List<Parameter> parameters) {
         if (parameters.stream().anyMatch(p -> p.getKey().equals(Parameter.KEY_FIXED_DELAY))) return Parameter.KEY_FIXED_DELAY;
         else if (parameters.stream().anyMatch(p -> p.getKey().equals(Parameter.KEY_TIMES))) return Parameter.KEY_TIMES;
@@ -47,11 +68,17 @@ public class TimeParameterValidator {
 
     public static final boolean validateParameterValue(Map<String,Object> parameters) {
         String key = getContainedTimeParameter(parameters);
+        if (key == null) return false;
+
+        long countTimeParameters = parameters.keySet().stream().filter(
+                k -> k.equals(Parameter.KEY_TIMES) || k.equals(Parameter.KEY_FIXED_DELAY)).count();
+        if (countTimeParameters != 1) return false;
+
         if(Parameter.KEY_FIXED_DELAY.equals(key)) {
             return validateFixedDelayParameterValue(parameters.get(key).toString());
         } else if (Parameter.KEY_TIMES.equals(key)) {
             try {
-                return validateTimesParameterValue(objectMapper.readValue(parameters.get(key).toString(), String[].class));
+                return validateTimesParameterValue((String[])parameters.get(key));
             } catch (Throwable e) {
                 return false;
             }
@@ -60,18 +87,18 @@ public class TimeParameterValidator {
         }
     }
 
-    public static final String getParameterTime(Map<String,Object> parameters, String defaultTime) {
+    public static final String getParameterFixedDelay(Map<String,Object> parameters, String defaultTime) {
         if (!containsTimeParameter(parameters)) return defaultTime;
         if (!validateParameterValue(parameters)) throw new RuntimeException();
-        return formattingAndCleaning(parameters.get(Parameter.KEY_FIXED_DELAY).toString());
+        return formattingAndCleaningOfFixedDelay(parameters.get(Parameter.KEY_FIXED_DELAY).toString());
     }
 
-    public static final String getParameterTime(CreateServiceInstanceRequest request, String defaultTime) {
-        return getParameterTime(request.getParameters(), defaultTime);
+    public static final String getParameterFixedDelay(CreateServiceInstanceRequest request, String defaultTime) {
+        return getParameterFixedDelay(request.getParameters(), defaultTime);
     }
 
-    public static final String getParameterTime(CreateServiceInstanceBindingRequest request, String defaultTime) {
-        return getParameterTime(request.getParameters(), defaultTime);
+    public static final String getParameterFixedDelay(CreateServiceInstanceBindingRequest request, String defaultTime) {
+        return getParameterFixedDelay(request.getParameters(), defaultTime);
     }
 
     public static final long getFixedDelayInMilliSecFromParameterValue(Map<String,Object> parameters, String defaultTime) {
@@ -119,10 +146,14 @@ public class TimeParameterValidator {
     public static final long getFixedDelayInMilliSecFromParameterValue(String parameterValue) {
         long time = 0;
 
-        List<String> timeSections = Arrays.asList(formattingAndCleaning(parameterValue).split(" "));
+        List<String> timeSections = Arrays.asList(formattingAndCleaningOfFixedDelay(parameterValue).split(" "));
         for (String s : timeSections) time += getTimeSection(s);
 
         return time;
+    }
+
+    public static final long getFixedDelayInMilliSecFromParameterValue(List<Parameter> parameters) {
+        return getFixedDelayInMilliSecFromParameterValue(Parameter.getParameterValueByKey(parameters, Parameter.KEY_FIXED_DELAY));
     }
 
     public static final long getFixedDelayInSecFromParameterValue(String parameterValue) {
@@ -150,23 +181,27 @@ public class TimeParameterValidator {
         for (String timeStr: times) {
             int hour = Integer.valueOf(timeStr.split(":")[0]);
             int min = Integer.valueOf(timeStr.split(":")[1]);
-            long lastCallInSec = Long.valueOf( Parameter.getParameterValueByKey(parameters, Parameter.KEY_LAST_CALL) ) / 1000;
-            if (isTimeExpired(System.currentTimeMillis(), hour, min, lastCallInSec)) return true;
+            long lastCall = Long.valueOf( Parameter.getParameterValueByKey(parameters, Parameter.KEY_LAST_CALL) );
+            long currentTime = System.currentTimeMillis();
+            if (isTimeExpired(currentTime, hour, min, lastCall)) {
+                log.debug("time {} is expired, lastCall: {} milli sec, currentTime: {} milli sec", timeStr, lastCall, currentTime);
+                return true;
+            }
         }
         return false;
     }
 
-    public static boolean isTimeExpired(long currentTime, int hourTime, int minTime, long lastCall) {
-        int lcHour = new Date(lastCall).getHours();
-        int lcMin = new Date(lastCall).getMinutes();
-        int nowHour = new Date(currentTime).getHours();
-        int nowMin = new Date(currentTime).getMinutes();
+    public static boolean isTimeExpired(long currentTime, long hourTime, long minTime, long lastCall) {
+        long lcHour = getHours(lastCall);
+        long lcMin = getMinutes(lastCall);
+        long nowHour = getHours(currentTime);
+        long nowMin = getMinutes(currentTime);
         boolean laterThanDefinedTime = (nowHour * 60 + nowMin ) >= (hourTime * 60 + minTime );
         boolean lastCallEarlierThanDefinedTime = (lcHour * 60 + lcMin ) < (hourTime * 60 + minTime );
         return laterThanDefinedTime && lastCallEarlierThanDefinedTime;
     }
 
-    private static String formattingAndCleaning(String parameterValue) {
+    private static String formattingAndCleaningOfFixedDelay(String parameterValue) {
         String value = parameterValue;
         value = value.toLowerCase();
         value = value.replaceAll(",", "");
@@ -249,5 +284,15 @@ public class TimeParameterValidator {
 
     private static long inMilliFromWeeks(long w) {
         return inMilliFromDays(w)*7;
+    }
+
+    public static long getHours(long timestamp) {
+        ZoneOffset o = OffsetDateTime.now().getOffset();
+        int offset = o.getTotalSeconds()/3600;
+        return (timestamp / (60 * 60 * 1000)) % 24 + offset;
+    }
+
+    public static long getMinutes(long timestamp) {
+        return (timestamp / (60 *1000) ) % 60;
     }
 }

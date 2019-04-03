@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.servicebroker.model.catalog.Catalog;
 import org.springframework.cloud.servicebroker.model.catalog.Plan;
@@ -19,6 +20,8 @@ import org.springframework.cloud.servicebroker.model.instance.CreateServiceInsta
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +30,12 @@ import java.util.UUID;
 public class ServicePlanHttpEndpointSchedulerTest {
 
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+
+    @Value("${broker.api.admin-user.username}")
+    private String adminUsername;
+
+    @Value("${broker.api.admin-user.password}")
+    private String adminPassword;
 
     @Autowired
     private Catalog catalog;
@@ -59,7 +68,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
                 .parameters(Parameter.KEY_FIXED_DELAY, "1h")
-                .parameters("url", url)
+                .parameters(Parameter.KEY_URL, url)
                 .build();
 
         servicePlan.saveRequestParamters(request);
@@ -81,10 +90,10 @@ public class ServicePlanHttpEndpointSchedulerTest {
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
                 .parameters(Parameter.KEY_FIXED_DELAY, "1h")
-                .parameters("url", url)
-                .parameters("httpMethod", "PUT")
-                .parameters("httpHeaders", headers)
-                .parameters("sslEnabled", false)
+                .parameters(Parameter.KEY_URL, url)
+                .parameters(Parameter.KEY_HTTP_METHOD, "PUT")
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
+                .parameters(Parameter.KEY_SSL_ENABLED, false)
                 .build();
 
         servicePlan.saveRequestParamters(request);
@@ -123,14 +132,13 @@ public class ServicePlanHttpEndpointSchedulerTest {
     public void testSaveParameters4() throws JsonProcessingException {
         String siId = UUID.randomUUID().toString();
         String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8"};
-        String headersAsStr = objectMapper.writeValueAsString(headers);
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
                 .parameters(Parameter.KEY_FIXED_DELAY, "1h")
-                .parameters("url", url)
-                .parameters("httpMethod", "REMOVE")
-                .parameters("httpHeaders", headers)
+                .parameters(Parameter.KEY_URL, url)
+                .parameters(Parameter.KEY_HTTP_METHOD, "REMOVE")
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
                 .build();
 
         boolean b = false;
@@ -147,13 +155,12 @@ public class ServicePlanHttpEndpointSchedulerTest {
     public void testSaveParameters5() throws JsonProcessingException {
         String siId = UUID.randomUUID().toString();
         String[] headers = new String[]{"Content-Type-application/json"};
-        String headersAsStr = objectMapper.writeValueAsString(headers);
         CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
                 .parameters(Parameter.KEY_FIXED_DELAY, "1h")
-                .parameters("url", url)
-                .parameters("httpHeaders", headers)
+                .parameters(Parameter.KEY_URL, url)
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
                 .build();
 
         boolean b = false;
@@ -169,7 +176,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
     @Test
     public void actionTest() throws IOException {
         String siId = UUID.randomUUID().toString();
-        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", "Authorization: Basic YWRtaW46YWRtaW4="};
+        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", getBasicAuthHeader()};
         String _url = url + "?"+UUID.randomUUID().toString(); // Make url unique in order to check it after the junit test
         ServiceInstance si = ServiceInstance.builder()
                 .serviceInstanceId(siId)
@@ -178,9 +185,9 @@ public class ServicePlanHttpEndpointSchedulerTest {
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
                 .parameters(Parameter.KEY_FIXED_DELAY, "1h")
-                .parameters("url", _url)
-                .parameters("httpMethod", "PUT")
-                .parameters("httpHeaders", headers)
+                .parameters(Parameter.KEY_URL, _url)
+                .parameters(Parameter.KEY_HTTP_METHOD, "PUT")
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
                 .build();
 
         servicePlan.saveRequestParamters(request);
@@ -194,7 +201,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
     @Test
     public void actionTest2() throws IOException {
         String siId = UUID.randomUUID().toString();
-        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", "Authorization: Basic YWRtaW46YWRtaW4="};
+        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", getBasicAuthHeader()};
         String _url = url + "?"+UUID.randomUUID().toString(); // Make url unique in order to check it after the junit test
         ServiceInstance si = ServiceInstance.builder()
                 .serviceInstanceId(siId)
@@ -203,8 +210,8 @@ public class ServicePlanHttpEndpointSchedulerTest {
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
                 .parameters(Parameter.KEY_FIXED_DELAY, "1h")
-                .parameters("url", _url)
-                .parameters("httpHeaders", headers)
+                .parameters(Parameter.KEY_URL, _url)
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
                 .build();
 
         servicePlan.saveRequestParamters(request);
@@ -219,7 +226,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
     @Test
     public void actionWithoutTimeExpirationTest() throws IOException {
         String siId = UUID.randomUUID().toString();
-        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", "Authorization: Basic YWRtaW46YWRtaW4="};
+        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", getBasicAuthHeader()};
         String _url = url + "?"+UUID.randomUUID().toString(); // Make url unique in order to check it after the junit test
         ServiceInstance si = ServiceInstance.builder()
                 .serviceInstanceId(siId)
@@ -228,9 +235,9 @@ public class ServicePlanHttpEndpointSchedulerTest {
                 .planId(servicePlan.getServicePlanId())
                 .serviceInstanceId(siId)
                 .parameters(Parameter.KEY_FIXED_DELAY, "1s")
-                .parameters("url", _url)
-                .parameters("httpMethod", "PUT")
-                .parameters("httpHeaders", headers)
+                .parameters(Parameter.KEY_URL, _url)
+                .parameters(Parameter.KEY_HTTP_METHOD, "PUT")
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
                 .build();
 
         servicePlan.saveRequestParamters(request);
@@ -244,5 +251,97 @@ public class ServicePlanHttpEndpointSchedulerTest {
         if (mockController.lastOperations.size() > 0) {
             Assert.assertNotEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
         }
+    }
+
+    @Test
+    public void timesParameterTest() throws IOException {
+        String siId = UUID.randomUUID().toString();
+        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", getBasicAuthHeader()};
+        String _url = url + "?"+UUID.randomUUID().toString(); // Make url unique in order to check it after the junit test
+
+        long hours = TimeParameterValidator.getHours(System.currentTimeMillis());
+        long minutes = TimeParameterValidator.getMinutes(System.currentTimeMillis()-60*1000); //-1min
+        String time = hours+":"+minutes;
+
+        ServiceInstance si = ServiceInstance.builder()
+                .serviceInstanceId(siId)
+                .build();
+        CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
+                .planId(servicePlan.getServicePlanId())
+                .serviceInstanceId(siId)
+                .parameters(Parameter.KEY_TIMES, new String[]{time})
+                .parameters(Parameter.KEY_URL, _url)
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
+                .build();
+
+        servicePlan.saveRequestParamters(request);
+
+        servicePlan.performActionForServiceInstance(si);
+
+        Assert.assertEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
+        Assert.assertEquals("GET", mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_HTTP_METHOD));
+    }
+
+    @Test
+    public void timesParameterWithoutCallTest() throws IOException {
+        String siId = UUID.randomUUID().toString();
+        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", getBasicAuthHeader()};
+        String _url = url + "?"+UUID.randomUUID().toString(); // Make url unique in order to check it after the junit test
+
+        long hours = TimeParameterValidator.getHours(System.currentTimeMillis());
+        long minutes = TimeParameterValidator.getMinutes(System.currentTimeMillis()+60*1000); //+1min
+        String time = hours+":"+minutes;
+
+        ServiceInstance si = ServiceInstance.builder()
+                .serviceInstanceId(siId)
+                .build();
+        CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
+                .planId(servicePlan.getServicePlanId())
+                .serviceInstanceId(siId)
+                .parameters(Parameter.KEY_TIMES, new String[]{time})
+                .parameters(Parameter.KEY_URL, _url)
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
+                .build();
+
+        servicePlan.saveRequestParamters(request);
+
+        servicePlan.performActionForServiceInstance(si);
+
+        Assert.assertNotEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
+    }
+
+    @Test
+    public void saveParameterTwoExclusiveTimeKeys() throws IOException {
+        String siId = UUID.randomUUID().toString();
+        String[] headers = new String[]{"Content-Type: application/json", "Accept-Charset: utf-8", getBasicAuthHeader()};
+        String _url = url + "?"+UUID.randomUUID().toString(); // Make url unique in order to check it after the junit test
+
+        long hours = TimeParameterValidator.getHours(System.currentTimeMillis());
+        long minutes = TimeParameterValidator.getMinutes(System.currentTimeMillis()-60*1000); //-1min
+        String time = hours+":"+minutes;
+
+        CreateServiceInstanceRequest request = CreateServiceInstanceRequest.builder()
+                .planId(servicePlan.getServicePlanId())
+                .serviceInstanceId(siId)
+                .parameters(Parameter.KEY_FIXED_DELAY, "1s")
+                .parameters(Parameter.KEY_TIMES, new String[]{time})
+                .parameters(Parameter.KEY_URL, _url)
+                .parameters(Parameter.KEY_HTTP_HEADERS, headers)
+                .build();
+
+        boolean b = false;
+        try {
+            servicePlan.saveRequestParamters(request);
+        } catch (Throwable e) {
+            b = true;
+        }
+        Assert.assertTrue(b);
+    }
+
+
+
+
+    public String getBasicAuthHeader() {
+        return "Authorization: Basic "+Base64.getEncoder().encodeToString((adminUsername+":"+adminPassword).getBytes());
     }
 }

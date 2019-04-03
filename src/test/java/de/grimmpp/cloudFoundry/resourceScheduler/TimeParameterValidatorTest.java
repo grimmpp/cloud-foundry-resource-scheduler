@@ -12,10 +12,7 @@ import org.springframework.cloud.servicebroker.model.instance.CreateServiceInsta
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class TimeParameterValidatorTest {
 
@@ -172,10 +169,10 @@ public class TimeParameterValidatorTest {
         SimpleDateFormat formatter = new SimpleDateFormat("H:m dd-MM-yyyy");
         Date date = formatter.parse("12:30 03-04-2019");
 
-        int nowHour = date.getHours();
-        int nowMin = date.getMinutes();
-        long currentTime = date.getTime() + 60 * 1000; //+1min
-        Long lastCall = currentTime - 5 * 60 * 60 * 1000; // -5h
+        long nowHour = TimeParameterValidator.getHours(date.getTime());
+        long nowMin = TimeParameterValidator.getMinutes(date.getTime());
+        long currentTime = 0;
+        long lastCall = 0;
         boolean b = false;
 
         // lastCall < defined time < current time
@@ -275,7 +272,7 @@ public class TimeParameterValidatorTest {
         Assert.assertTrue(b);
         long time = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(request.getParameters(), defaultTime);
         Assert.assertEquals(w + 3*d + 5*m, time);
-        String parameterTime = TimeParameterValidator.getParameterTime(request, defaultTime);
+        String parameterTime = TimeParameterValidator.getParameterFixedDelay(request, defaultTime);
         Assert.assertEquals("1w 3d 5m", parameterTime);
 
         // Take default time in none is in request
@@ -288,7 +285,7 @@ public class TimeParameterValidatorTest {
         Assert.assertTrue(b);
         time = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue(request.getParameters(), defaultTime);
         Assert.assertEquals(8*h, time);
-        parameterTime = TimeParameterValidator.getParameterTime(request, defaultTime);
+        parameterTime = TimeParameterValidator.getParameterFixedDelay(request, defaultTime);
         Assert.assertEquals(defaultTime, parameterTime);
 
         // change to wrong format
@@ -309,11 +306,30 @@ public class TimeParameterValidatorTest {
         Assert.assertTrue(b);
         b = false;
         try {
-            TimeParameterValidator.getParameterTime(request, defaultTime);
+            TimeParameterValidator.getParameterFixedDelay(request, defaultTime);
         } catch (Throwable e) {
             b = true;
         }
         Assert.assertTrue(b);
     }
 
+    @Test
+    public void getHoursTest() throws ParseException {
+        long currentTime = 1554320866000L;
+        Assert.assertEquals(21, TimeParameterValidator.getHours(currentTime));
+
+        SimpleDateFormat formatter = new SimpleDateFormat("H:m dd-MM-yyyy");
+        Date date = formatter.parse("12:30 03-04-2019");
+        Assert.assertEquals(12, TimeParameterValidator.getHours(date.getTime()));
+    }
+
+    @Test
+    public void getMinituesTest() throws ParseException {
+        long currentTime = 1554320866000L;
+        Assert.assertEquals(47, TimeParameterValidator.getMinutes(currentTime));
+
+        SimpleDateFormat formatter = new SimpleDateFormat("H:m dd-MM-yyyy");
+        Date date = formatter.parse("12:30 03-04-2019");
+        Assert.assertEquals(30, TimeParameterValidator.getMinutes(date.getTime()));
+    }
 }

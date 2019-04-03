@@ -35,8 +35,6 @@ public class Parameter implements Serializable {
     public static final String KEY_HTTP_HEADERS = "httpHeaders";
     public static final String KEY_SSL_ENABLED = "sslEnabled";
     public static final String KEY_URL = "url";
-    public static final String[] MANDATORY_PARAMETERS = new String[]{ KEY_FIXED_DELAY, KEY_URL};
-    //public static final String[] OPTIONAL_PARAMETERS = new String[]{ KEY_HTTP_METHOD, KEY_HTTP_HEADERS };
     public static final String KEY_LAST_CALL = "lastCall";
 
     @Id @GeneratedValue

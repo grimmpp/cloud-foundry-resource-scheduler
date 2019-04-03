@@ -30,8 +30,10 @@ public class CatalogConfig {
                                     .description("Triggers defined http endpoint after a defined time. After the scheduler triggered all endpoints it will pause for 30 sec.")
                                     .metadata("bullets", new String[]{
                                         "Client timeout for the scheduler is set to 500 milli sec. The scheduler is NOT evaluating and is NOT waiting for a response.",
-                                        "Parameter \"{\"fixedDelay\": \"1w 3d 2h 5min\"}\" (w=week, d=day, h=hour, m=minute) is time after which the trigger starts.",
-                                        "Parameter \"{\"url\": \"https://full-url.com\"}\" is the url which will be triggered.",
+                                        "Either 'fixedDelay' or 'times' must be chosen as parameter. Both parameters are exclusive.",
+                                        "Exclusive Parameter \"{\"fixedDelay\": \"1w 3d 2h 5min\"}\" (w=week, d=day, h=hour, m=minute) is a time period of time after which the trigger starts.",
+                                        "Exclusive Parameter \"{\"times\": [\"09:05\", \"12:05\", \"15:05\", \"20:05\"] is a list of points in time [hour:min]. When one of those times are reached then the trigger starts.",
+                                        "Mandatory git Parameter \"{\"url\": \"https://full-url.com\"}\" is the url which will be triggered.",
                                         "Optional Parameter \"{\"httpMethod\": \"GET\"}\" (values: GET, PUT, POST, DELETE) is the http method which will be set. (Default value is GET)",
                                         "Optional Parameter \"{\"httpHeaders\": [\"Content-Type: application/json; charset=UTF-8\"]} ",
                                         "Optional Parameter \"{\"sslEnabled\": false} (Default value is true) "
