@@ -1,6 +1,7 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.config;
 
 import de.grimmpp.cloudFoundry.resourceScheduler.service.ServicePlanAppRestarter;
+import de.grimmpp.cloudFoundry.resourceScheduler.service.ServicePlanRollingContainerRestarter;
 import de.grimmpp.cloudFoundry.resourceScheduler.service.ServicePlanSwitchOffAppsInSpace;
 import de.grimmpp.cloudFoundry.resourceScheduler.service.ServicePlanSwitchOffWholeSpace;
 import org.springframework.cloud.servicebroker.model.catalog.*;
@@ -48,20 +49,25 @@ public class CatalogConfig {
                                     .name("AppRestarter")
                                     .description("Bound apps to service instances of AppRestarter will be restarted after a defined time. (Default time is 8h) All app instances will be restarted at the same point in time.")
                                     .metadata("bullets", new String[]{
-
+                                            "Hard restart of all containers at the same time if app is bound to a service instance of this plan when defined time is expired.",
+                                            "Parameter \"{\"times\": [\"09:05\", \"12:05\", \"15:05\", \"20:05\"] is a list of points in time [hour:min]. When one of those times are reached then all apps will be stopped.",
                                     })
                                     .bindable(true)
                                     .free(true)
                                     .build(),
-/*
+
                             Plan.builder()
-                                    .id("e3e8719a-2994-49f5-ac6a-e3fffc3673a4")
+                                    .id(ServicePlanRollingContainerRestarter.PLAN_ID)
                                     .name("RollingContainerRestarter")
-                                    .description("Restarts apps which are bind to this service plan in a rolling manner. It restarts single container, one after another, and only if all others in a healthy state.")
+                                    .description("Restarts apps which are bind to this service plan in a rolling manner. It restarts single container, one after another, and only if all others are in a healthy state (RUNNING).")
+                                    .metadata("bullets", new String[]{
+                                            "Restarts on container after another of an app which is bound to a service instance of this plan when defined time is expired.",
+                                            "Parameter \"{\"times\": [\"09:05\", \"12:05\", \"15:05\", \"20:05\"] is a list of points in time [hour:min]. When one of those times are reached then all apps will be stopped.",
+                                    })
                                     .bindable(true)
                                     .free(true)
                                     .build(),
-//*/
+
                             Plan.builder()
                                     .id(ServicePlanSwitchOffAppsInSpace.PLAN_ID)
                                     .name("SwitchOffAppsInSpace")
