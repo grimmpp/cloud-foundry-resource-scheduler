@@ -16,9 +16,14 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceInstance {
+public class ServicePlanSwitchOffWholeSpace extends IServicePlanBasedOnServiceInstance {
 
-    public static final String PLAN_ID = "4e1020f9-6577-4ba3-885f-95bb978b4939";
+    public static final String PLAN_ID = "ea645636-3fd6-430e-90dc-4c8af5dce6a8";
+
+    @Override
+    public String getServicePlanId() {
+        return PLAN_ID;
+    }
 
     @Override
     protected void performActionForServiceInstance(ServiceInstance si) throws IOException {
@@ -29,18 +34,18 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
         // Check if space contains prod in its name.
         if (!space.getEntity().getName().toLowerCase().contains("prod")) {
 
-            String url = cfClient.buildUrl(CfClient.URI_APPS_OF_SPACE, si.getSpaceId());
-            List<Resource<Application>> apps = cfClient.getResources(url, Application.class);
-            log.debug("Found {} apps in space: {} for service instance {}", apps.size(), PLAN_ID, si.getServiceInstanceId());
+            if (isExpired(si)) {
+                // Get apps
+                String url = cfClient.buildUrl(CfClient.URI_APPS_OF_SPACE, si.getSpaceId());
+                List<Resource<Application>> apps = cfClient.getResources(url, Application.class);
+                log.debug("Found {} apps in space: {} for service instance {}", apps.size(), PLAN_ID, si.getServiceInstanceId());
 
-            for (Resource<Application> app : apps) {
+                for (Resource<Application> app : apps) {
 
-                if (app.getEntity().getState().equals("STARTED")) {
-                    String logLine = String.format("app: %s, space: %s because of serviceInstance: %s",
-                            app.getMetadata().getGuid(), si.getSpaceId(), si.getServiceInstanceId());
+                    if (app.getEntity().getState().equals("STARTED")) {
+                        String logLine = String.format("app: %s, space: %s because of serviceInstance: %s",
+                                app.getMetadata().getGuid(), si.getSpaceId(), si.getServiceInstanceId());
 
-                    long lastModified = app.getMetadata().getUpdated_at().getTime();
-                    if (isExpired(si, lastModified)) {
                         try {
                             String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, app.getMetadata().getGuid());
                             cfClient.updateResource(appUrl, "{\"state\": \"STOPPED\"}", Application.class);
@@ -50,11 +55,12 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
                             log.error("Cannot stop " + logLine, e);
                         }
                     } else {
-                        log.debug("App {} is not expired. Last app update: {}", app.getMetadata().getGuid(), app.getMetadata().getUpdated_at());
+                        log.debug("App {} was already stopped.", app.getMetadata().getGuid());
                     }
-                } else {
-                    log.debug("App {} is in state {}", app.getMetadata().getGuid(), app.getEntity().getState());
                 }
+                storeLastCall(si);
+            } else {
+                log.debug("Nothing to do for service instance {}", si.getServiceInstanceId());
             }
         } else {
             log.debug("Cancelled space {} consideration because it contains 'prod' in its name: {}",
@@ -62,17 +68,24 @@ public class ServicePlanSwitchOffAppsInSpace extends IServicePlanBasedOnServiceI
         }
     }
 
-    private boolean isExpired(ServiceInstance si, long lastAppUpdateInMilliSec) {
-        Parameter parameterFixedDelay = pRepo.findByReferenceAndKey(si.getServiceInstanceId(), Parameter.KEY_FIXED_DELAY);
-        long fixedDelay = TimeParameterValidator.getFixedDelayInMilliSecFromParameterValue( parameterFixedDelay.getValue() );
-        long currentTime = System.currentTimeMillis();
-        long timeDiff = currentTime - lastAppUpdateInMilliSec;
-        return timeDiff > fixedDelay;
+    private boolean isExpired(ServiceInstance si) throws IOException {
+        List<Parameter> params = pRepo.findByReference(si.getServiceInstanceId());
+        return TimeParameterValidator.isTimesExpired(params);
     }
 
-    @Override
-    public String getServicePlanId() {
-        return PLAN_ID;
+    private void storeLastCall(ServiceInstance si) {
+        // Remember last http call made.
+        List<Parameter> params = pRepo.findByReference(si.getServiceInstanceId());
+        Parameter p = Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL);
+        if (p==null) {
+            p = Parameter.builder()
+                    .reference(si.getServiceInstanceId())
+                    .key(Parameter.KEY_LAST_CALL)
+                    .build();
+        }
+        p.setValue(Long.toString(System.currentTimeMillis()));
+        pRepo.save(p);
+        log.debug("Remembered last shutdown of space.");
     }
 
     @Override

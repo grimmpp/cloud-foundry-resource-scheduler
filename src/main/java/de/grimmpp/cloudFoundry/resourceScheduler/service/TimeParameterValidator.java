@@ -186,7 +186,7 @@ public class TimeParameterValidator {
             long lastCall = Long.valueOf( Parameter.getParameterValueByKey(parameters, Parameter.KEY_LAST_CALL) );
             long currentTime = System.currentTimeMillis();
             if (isTimeExpired(currentTime, hour, min, lastCall)) {
-                log.debug("time {} is expired, lastCall: {} milli sec, currentTime: {} milli sec", timeStr, lastCall, currentTime);
+                log.debug("Time {} is expired, lastCall: {} milli sec, currentTime: {} milli sec", timeStr, lastCall, currentTime);
                 return true;
             }
         }
