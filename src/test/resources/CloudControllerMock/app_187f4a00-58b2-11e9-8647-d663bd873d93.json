@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "guid": "187f4a00-58b2-11e9-8647-d663bd873d93",
+    "url": "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93",
+    "created_at": "2019-03-19T15:46:28Z",
+    "updated_at": "2019-03-19T16:51:56Z"
+  },
+  "entity": {
+    "name": "app-manager",
+    "production": false,
+    "space_guid": "359b04a4-1006-4c57-b14d-9dfec46f8e78",
+    "stack_guid": "9c459d56-a2c1-452f-8f6c-bb51ec7dc59c",
+    "buildpack": null,
+    "detected_buildpack": "client-certificate-mapper=1.8.0_RELEASE container-customizer=2.6.0_RELEASE container-security-provider=1.16.0_RELEASE java-buildpack=\u001B[34mv4.17.2\u001B[0m-https://github.com/cloudfoundry/java-buildpack.git#47e68da java-main java-opts java-security jvmkill-a...",
+    "detected_buildpack_guid": "f4adf7e5-1087-465e-a355-7325611d9322",
+    "environment_json": {},
+    "memory": 1024,
+    "instances": 4,
+    "disk_quota": 1024,
+    "state": "STARTED",
+    "version": "8475fcd7-c684-43b4-8c41-e69741e1a072",
+    "command": null,
+    "console": false,
+    "debug": null,
+    "staging_task_id": "0333c39d-9938-46b2-9bb8-80b8e7ce03f4",
+    "package_state": "STAGED",
+    "health_check_type": "port",
+    "health_check_timeout": null,
+    "health_check_http_endpoint": "",
+    "staging_failed_reason": null,
+    "staging_failed_description": null,
+    "diego": true,
+    "docker_image": null,
+    "docker_credentials": {
+      "username": null,
+      "password": null
+    },
+    "package_updated_at": "2019-03-19T16:51:50Z",
+    "detected_start_command": "JAVA_OPTS=\"-agentpath:$PWD/.java-buildpack/open_jdk_jre/bin/jvmkill-1.16.0_RELEASE=printHeapHistogram=1 -Djava.io.tmpdir=$TMPDIR -XX:ActiveProcessorCount=$(nproc) -Djava.ext.dirs=$PWD/.java-buildpack/container_security_provider:$PWD/.java-buildpack/open_jdk_jre/lib/ext -Djava.security.properties=$PWD/.java-buildpack/java_security/java.security $JAVA_OPTS\" && CALCULATED_MEMORY=$($PWD/.java-buildpack/open_jdk_jre/bin/java-buildpack-memory-calculator-3.13.0_RELEASE -totMemory=$MEMORY_LIMIT -loadedClasses=14897 -poolType=metaspace -stackThreads=250 -vmOptions=\"$JAVA_OPTS\") && echo JVM Memory Configuration: $CALCULATED_MEMORY && JAVA_OPTS=\"$JAVA_OPTS $CALCULATED_MEMORY\" && MALLOC_ARENA_MAX=2 SERVER_PORT=$PORT eval exec $PWD/.java-buildpack/open_jdk_jre/bin/java $JAVA_OPTS -cp $PWD/. org.springframework.boot.loader.WarLauncher",
+    "enable_ssh": true,
+    "ports": [
+      8080
+    ],
+    "space_url": "/v2/spaces/359b04a4-1006-4c57-b14d-9dfec46f8e78",
+    "stack_url": "/v2/stacks/9c459d56-a2c1-452f-8f6c-bb51ec7dc59c",
+    "routes_url": "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93/routes",
+    "events_url": "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93/events",
+    "service_bindings_url": "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93/service_bindings",
+    "route_mappings_url": "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93/route_mappings"
+  }
+}

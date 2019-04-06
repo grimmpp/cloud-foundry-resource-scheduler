@@ -56,7 +56,7 @@ public class CatalogConfig {
 /*
                             Plan.builder()
                                     .id("e3e8719a-2994-49f5-ac6a-e3fffc3673a4")
-                                    .name("Rolling Container Restarter")
+                                    .name("RollingContainerRestarter")
                                     .description("Restarts apps which are bind to this service plan in a rolling manner. It restarts single container, one after another, and only if all others in a healthy state.")
                                     .bindable(true)
                                     .free(true)

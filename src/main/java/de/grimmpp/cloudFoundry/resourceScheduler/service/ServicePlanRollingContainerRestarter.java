@@ -14,13 +14,15 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
+public class ServicePlanRollingContainerRestarter extends IServicePlanBasedOnAppBinding {
 
-    public static final String PLAN_ID = "31b97c09-9cfb-4108-8894-33eb22016cee";
+    public static final String PLAN_ID = "50afb061-866d-44ff-9af8-53e5547f330e";
 
     @Override
     public String getServicePlanId() {
@@ -44,7 +46,6 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
                         .build());
     }
 
-
     @Override
     protected void performActionForBinding(ServiceInstance si, Binding b, Resource<Application> app, Long timeInSec) throws IOException {
 
@@ -55,30 +56,37 @@ public class ServicePlanAppRestarter extends IServicePlanBasedOnAppBinding {
             ApplicationInstances ais = cfClient.getObject(aiUrl, ApplicationInstances.class);
             log.trace("App Instances: {}", objectMapper.writeValueAsString(ais));
 
-            List<AppInstanceState> expiredAis = ais.values().stream().filter(i -> i.getUptime() > timeInSec).collect(Collectors.toList());
-            log.debug("Expired app instances: {}", expiredAis.size());
-            for(String index : ais.keySet()) {
-                AppInstanceState state = ais.get(index);
-                log.debug("Compare time: App {}, instance {}, state: {}, uptime: {} sec", app.getMetadata().getGuid(), index, state.getState(), state.getUptime());
-            }
+            // Are all application instances in state running? Is the app healthy?
+            if (ais.values().stream().allMatch(i -> i.getState().equals("RUNNING"))) {
+                log.debug("All app instances are in state RUNNING.");
 
-            if (expiredAis.size() > 0) {
-                for (int i = 0; i < app.getEntity().getInstances(); i++) {
+                Map.Entry<String,AppInstanceState> oldestAi = ais.entrySet().stream().sorted(
+                        (e1, e2) -> e2.getValue().getUptime().compareTo(e1.getValue().getUptime())).findFirst().get();
+                boolean isExpired = oldestAi.getValue().getUptime() > timeInSec;
+                int index = Integer.valueOf( oldestAi.getKey() );
 
-                    String logLine = String.format("app instances %s, app: %s, space: %s, org: %s, si: %s, plan: %s",
-                            i, b.getApplicationId(), si.getSpaceId(), si.getOrgId(), si.getServiceInstanceId(), PLAN_ID);
+                if (isExpired) {
+                    String logLine = String.format("app instance %s, app: %s, space: %s, org: %s, si: %s, plan: %s",
+                            index, b.getApplicationId(), si.getSpaceId(), si.getOrgId(), si.getServiceInstanceId(), PLAN_ID);
 
                     try {
-                        String instanceUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCE, false, b.getApplicationId(), String.valueOf(i));
+                        String instanceUrl = cfClient.buildUrl(CfClient.URI_APP_INSTANCE, false, b.getApplicationId(), String.valueOf(index));
                         cfClient.deleteResource(instanceUrl);
 
-                        log.info("=> Restarted "+logLine);
+                        log.info("=> Restarted " + logLine);
                     } catch (Throwable e) {
-                        log.error("Cannot restart instance: "+i+", "+logLine, e);
+                        log.error("Cannot restart instance: " + index + ", " + logLine, e);
                     }
+                } else {
+                    log.debug("No app instance is expired of app {} {}.", app.getEntity().getName(), app.getMetadata().getGuid());
                 }
             } else {
-                log.debug("No app instance is expired of app {} {}.", app.getEntity().getName(), app.getMetadata().getGuid());
+                log.debug("Cannot restart container because not all containers are in a health state.");
+                for (Map.Entry<String,AppInstanceState> e: ais.entrySet()) {
+                    log.debug("App {} {}, Instance: {}, State: {} ",
+                            app.getEntity().getName(), app.getMetadata().getGuid(),
+                            e.getKey(), e.getValue().getState());
+                }
             }
         } else {
             log.debug("App {} {} is not started. ", app.getEntity().getName(), app.getMetadata().getGuid());

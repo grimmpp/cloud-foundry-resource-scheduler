@@ -80,6 +80,5 @@ public class ServicePlanAppRestarterTest {
             String url = cfApiMockController.lastOperations.get(i).get(CfApiMockController.KEY_URL);
             Assert.assertEquals("/v2/apps/"+appId+"/instances/"+(3-i), url);
         }
-
     }
 }
