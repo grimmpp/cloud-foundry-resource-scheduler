@@ -31,7 +31,6 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
   * Multi-threaded scheduler for all service plans
   * Multi application instances => currently it's a single container application.
   * Tracing for http communication + header field which identifies sender
-  * A few service plans see above
 
 ## How to build and run unit tests
 ````
