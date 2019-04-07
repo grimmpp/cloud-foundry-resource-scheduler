@@ -31,6 +31,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
   * Multi-threaded scheduler for all service plans
   * Multi application instances => currently it's a single container application.
   * sync job which checks if broker db is in same state like cf db, only regarding its own instances.
+  * reduction of memory consumption
   * Tracing for http communication + header field which identifies sender
 
 ## How to build and run unit tests
