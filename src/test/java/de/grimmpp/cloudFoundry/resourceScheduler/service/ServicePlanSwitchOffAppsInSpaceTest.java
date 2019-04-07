@@ -2,6 +2,7 @@ package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
+import de.grimmpp.cloudFoundry.resourceScheduler.mocks.AbstractMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.mocks.CfApiMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.AppManagerApplication;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
@@ -71,7 +72,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
         String httpMethod = cfApiMockController.getLastOperation(CfApiMockController.KEY_HTTP_METHOD);
         Assert.assertEquals(RequestMethod.PUT.toString(), httpMethod);
 
-        String url = "/v2/apps/15b3885d-0351-4b9b-8697-86641668c123";
+        String url = AbstractMockController.BASE_URL + "/v2/apps/15b3885d-0351-4b9b-8697-86641668c123?order-direction=asc&results-per-page=100&page=1";
         Assert.assertEquals(url, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
 
         String requestBody = "{\"state\": \"STOPPED\"}";
@@ -94,7 +95,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
         String httpMethod = cfApiMockController.getLastOperation(CfApiMockController.KEY_HTTP_METHOD);
         Assert.assertEquals(RequestMethod.GET.toString(), httpMethod);
 
-        String url = "/v2/spaces/bc8d3381-390d-4bd7-8c71-25309900a2e3";
+        String url = AbstractMockController.BASE_URL + "/v2/spaces/bc8d3381-390d-4bd7-8c71-25309900a2e3?order-direction=asc&results-per-page=100&page=1";
         Assert.assertEquals(url, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
 
         String requestBody = "";
@@ -124,7 +125,7 @@ public class ServicePlanSwitchOffAppsInSpaceTest {
         String httpMethod = cfApiMockController.getLastOperation(CfApiMockController.KEY_HTTP_METHOD);
         Assert.assertEquals(RequestMethod.GET.toString(), httpMethod);
 
-        String url = "/v2/spaces/162dc5a3-ddb9-41bc-9fb0-38cc7aec73f9/apps";
+        String url = AbstractMockController.BASE_URL + "/v2/spaces/162dc5a3-ddb9-41bc-9fb0-38cc7aec73f9/apps?order-direction=asc&results-per-page=100&page=1";
         Assert.assertEquals(url, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
 
         String requestBody = "";

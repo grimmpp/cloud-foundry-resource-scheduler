@@ -49,8 +49,13 @@ public class CfClient {
     public static final String URI_OAUTH_TOKEN = "/oauth/token";
     public static final String URI_API_INFO = "/v2/info";
 
+    public static final String HEADER_NAME_CF_SENDER_APP = "X-CF-SENDER-APP-INSTANCE";
+
     @Autowired
     private VcapApplication vcapApp;
+
+    @Value("${CF_INSTANCE_INDEX}")
+    private Integer cfInstanceIndex;
 
     @Value("${cfClient.SSL-Validation-enabled}")
     private Boolean enableSslValidation;
@@ -113,6 +118,7 @@ public class CfClient {
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(HEADER_NAME_CF_SENDER_APP, vcapApp.getApplication_id()+":"+cfInstanceIndex);
         return headers;
     }
 

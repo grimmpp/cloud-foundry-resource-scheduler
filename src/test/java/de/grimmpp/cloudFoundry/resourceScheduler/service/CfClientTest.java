@@ -34,6 +34,12 @@ public class CfClientTest {
     @Value("${cfClient.oauth-enabled}")
     private Boolean oauthEnabled;
 
+    @Value("${CF_INSTANCE_INDEX}")
+    private Integer cfInstanceIndex;
+
+    @Autowired
+    private CfApiMockController cfApiMockController;
+
     @Test
     public void isSslValidationDisabledForTest(){
         Assert.assertTrue(!enableSslValidation);
@@ -98,6 +104,14 @@ public class CfClientTest {
 
         String url = cfClient.getTokenEndpoint();
         Assert.assertEquals("http://localhost:8111/cf_api_mock/oauth/token", url);
+    }
+
+    @Test
+    public void appSenderHeaderTest() throws IOException {
+        ApiInfo apiInfo = cfClient.getObject(cfClient.buildUrl(CfClient.URI_API_INFO), ApiInfo.class);
+        String senderId = cfApiMockController.getLastOperation(CfClient.HEADER_NAME_CF_SENDER_APP);
+
+        Assert.assertEquals(vcapApp.getApplication_id()+":"+cfInstanceIndex, senderId);
     }
 
 /*

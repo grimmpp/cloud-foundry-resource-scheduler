@@ -3,9 +3,12 @@ package de.grimmpp.cloudFoundry.resourceScheduler.mocks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.VcapApplication;
+import de.grimmpp.cloudFoundry.resourceScheduler.service.CfClient;
+import io.micrometer.core.instrument.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ResourceUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,6 +24,7 @@ public abstract class AbstractMockController {
     @Autowired
     private VcapApplication vcapApp;
 
+    public static final String BASE_URL = "http://localhost:8111/cf_api_mock";
     public static final String KEY_URL = "URL";
     public static final String KEY_REQUEST_BODY = "ReqBody";
     public static final String KEY_RESPONSE_BODY = "RespBody";
@@ -31,12 +35,21 @@ public abstract class AbstractMockController {
         return lastOperations.get(0).get(key);
     }
 
-    public void insertLastOperation(String url, String httpMethod, String reqBody, String respBody) {
+    public void insertLastOperation(HttpServletRequest request, String requestBody, String respBody) throws IOException {
         lastOperations.add(0, new HashMap<String, String>(){{
+            String url = request.getRequestURL().toString();
+            if (request.getQueryString() != null) url += "?"+request.getQueryString();
+            //url = url.replace("http://localhost:8111/cf_api_mock", "");
+
             put(KEY_URL, url);
-            put(KEY_REQUEST_BODY, reqBody);
+            //request body stream was already used from spring boot and is empty now. ...
+            put(KEY_REQUEST_BODY, requestBody);
+            put(KEY_HTTP_METHOD, request.getMethod());
             put(KEY_RESPONSE_BODY, respBody);
-            put(KEY_HTTP_METHOD, httpMethod);
+
+            String value = request.getHeader(CfClient.HEADER_NAME_CF_SENDER_APP);
+            put(CfClient.HEADER_NAME_CF_SENDER_APP, value);
+
         }});
     }
 

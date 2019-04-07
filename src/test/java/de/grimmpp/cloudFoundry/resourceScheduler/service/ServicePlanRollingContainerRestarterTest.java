@@ -1,6 +1,7 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 import de.grimmpp.cloudFoundry.resourceScheduler.AppManagerApplication;
+import de.grimmpp.cloudFoundry.resourceScheduler.mocks.AbstractMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.mocks.CfApiMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Application;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Resource;
@@ -94,7 +95,7 @@ public class ServicePlanRollingContainerRestarterTest {
         servicePlan.performActionForBinding(si, b, app, time);
 
         Assert.assertEquals(RequestMethod.GET.toString(), cfApiMockController.getLastOperation(CfApiMockController.KEY_HTTP_METHOD));
-        String aiUrl = "/v2/apps/ae93a4ec-42c2-4087-b4f6-03d79c6aa822/instances";
+        String aiUrl = AbstractMockController.BASE_URL + "/v2/apps/ae93a4ec-42c2-4087-b4f6-03d79c6aa822/instances";
         Assert.assertTrue(aiUrl.endsWith(cfApiMockController.getLastOperation(CfApiMockController.KEY_URL)));
     }
 
@@ -123,7 +124,7 @@ public class ServicePlanRollingContainerRestarterTest {
         servicePlan.performActionForBinding(si, b, app, time);
 
         Assert.assertEquals(RequestMethod.DELETE.toString(), cfApiMockController.getLastOperation(CfApiMockController.KEY_HTTP_METHOD));
-        String aiUrl = "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93/instances/1";
+        String aiUrl = AbstractMockController.BASE_URL + "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93/instances/1";
         Assert.assertEquals(aiUrl, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
     }
 
@@ -152,7 +153,7 @@ public class ServicePlanRollingContainerRestarterTest {
         servicePlan.performActionForBinding(si, b, app, time);
 
         Assert.assertEquals(RequestMethod.GET.toString(), cfApiMockController.getLastOperation(CfApiMockController.KEY_HTTP_METHOD));
-        String aiUrl = "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93/instances";
+        String aiUrl = AbstractMockController.BASE_URL + "/v2/apps/187f4a00-58b2-11e9-8647-d663bd873d93/instances";
         Assert.assertEquals(aiUrl, cfApiMockController.getLastOperation(CfApiMockController.KEY_URL));
     }
 }

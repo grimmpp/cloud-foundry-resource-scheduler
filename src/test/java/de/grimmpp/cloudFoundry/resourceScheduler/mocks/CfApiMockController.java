@@ -1,31 +1,36 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.mocks;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
-import de.grimmpp.cloudFoundry.resourceScheduler.model.VcapApplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
+
 
 @Controller()
 public class CfApiMockController extends AbstractMockController{
 
+    @Autowired
+    private HttpServletRequest request;
+
     @RequestMapping("/cf_api_mock/v2/info")
     @ResponseBody
     public String getApiInfo() throws IOException {
-        return getResourceContent("apiInfo");
+        String response = getResourceContent("apiInfo");
+        insertLastOperation(request, "", response);
+
+        return response;
     }
 
     @RequestMapping("/cf_api_mock/oauth/token")
     @ResponseBody
     public String getMockToken() throws IOException {
-        return getResourceContent("oauthToken");
+        String response = getResourceContent("oauthToken");
+
+        insertLastOperation(request,"", response);
+
+        return response;
     }
 
     @RequestMapping("/cf_api_mock/v2/{resources}/{id}/{dependentResources}")
@@ -53,7 +58,7 @@ public class CfApiMockController extends AbstractMockController{
             respBody = getResourceContent("ais_"+id);
         }
 
-        insertLastOperation("/v2/"+resources+"/"+id+"/"+dependentResources, "GET", "", respBody);
+        insertLastOperation(request, "", respBody);
 
         return respBody;
     }
@@ -66,10 +71,11 @@ public class CfApiMockController extends AbstractMockController{
             @PathVariable("dependentResources") String dependentResources,
             @PathVariable("drid") String dependentResourceId)
             throws IOException {
+        String respBody = "";
 
-        insertLastOperation("/v2/"+resources+"/"+id+"/"+dependentResources+"/"+dependentResourceId, "DELETE", "", "");
+        insertLastOperation(request, "", respBody);
 
-        return "";
+        return respBody;
     }
 
     @RequestMapping("/cf_api_mock/v2/{resources}/{id}")
@@ -88,7 +94,7 @@ public class CfApiMockController extends AbstractMockController{
             respBody = getResourceContent("space_"+id);
         }
 
-        insertLastOperation("/v2/"+resources+"/"+id, "GET", "", respBody);
+        insertLastOperation(request, "", respBody);
 
         return respBody;
     }
@@ -103,7 +109,7 @@ public class CfApiMockController extends AbstractMockController{
 
         String respBody = "";
 
-        insertLastOperation("/v2/"+resources+"/"+id, "PUT", reqBody, respBody);
+        insertLastOperation(request, reqBody, respBody);
 
         return respBody;
     }
@@ -121,7 +127,7 @@ public class CfApiMockController extends AbstractMockController{
             respBody = getResourceContent("");
         }
 
-        insertLastOperation("/v2/"+resources, "GET", "", respBody);
+        insertLastOperation(request, "", respBody);
 
         return respBody;
     }

@@ -1,6 +1,7 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 import de.grimmpp.cloudFoundry.resourceScheduler.AppManagerApplication;
+import de.grimmpp.cloudFoundry.resourceScheduler.mocks.AbstractMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.mocks.CfApiMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Application;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Resource;
@@ -95,8 +96,9 @@ public class ServicePlanAppRestarterTest {
             String httpMethod = cfApiMockController.lastOperations.get(i).get(CfApiMockController.KEY_HTTP_METHOD);
             Assert.assertEquals(RequestMethod.DELETE.toString(), httpMethod);
 
-            String url = cfApiMockController.lastOperations.get(i).get(CfApiMockController.KEY_URL);
-            Assert.assertEquals("/v2/apps/"+appId+"/instances/"+(3-i), url);
+            String expectedUrl = cfApiMockController.lastOperations.get(i).get(CfApiMockController.KEY_URL);
+            String url = AbstractMockController.BASE_URL + "/v2/apps/"+appId+"/instances/"+(3-i);
+                    Assert.assertEquals(url, expectedUrl);
         }
     }
 }
