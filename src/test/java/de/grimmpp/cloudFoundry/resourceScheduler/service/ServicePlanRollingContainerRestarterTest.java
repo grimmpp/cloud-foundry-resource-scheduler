@@ -5,14 +5,20 @@ import de.grimmpp.cloudFoundry.resourceScheduler.mocks.CfApiMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Application;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Resource;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Binding;
+import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
+import de.grimmpp.cloudFoundry.resourceScheduler.model.database.ParameterRepository;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.ServiceInstance;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
+import org.springframework.cloud.servicebroker.model.catalog.Catalog;
+import org.springframework.cloud.servicebroker.model.catalog.Plan;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.tags.Param;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -28,10 +34,39 @@ public class ServicePlanRollingContainerRestarterTest {
     private CfClient cfClient;
 
     @Autowired
+    private Catalog catalog;
+
+    @Autowired
+    protected ParameterRepository pRepo;
+
+    @Autowired
     private ServicePlanRollingContainerRestarter servicePlan;
 
     private String siId = UUID.randomUUID().toString();
     private String spaceId = "359b04a4-1006-4c57-b14d-9dfec46f8e78";
+
+    @Test
+    public void catalogTest() {
+        boolean b = false;
+        for(Plan p: catalog.getServiceDefinitions().get(0).getPlans()) {
+            b = p.getId().equals(servicePlan.getServicePlanId());
+            if (b) break;
+        }
+        Assert.assertTrue(b);
+    }
+
+    @Test
+    public void saveRequestParamtersTest() {
+        CreateServiceInstanceBindingRequest request = CreateServiceInstanceBindingRequest.builder()
+                .serviceInstanceId(siId)
+                .planId(ServicePlanRollingContainerRestarter.PLAN_ID)
+                .parameters(Parameter.KEY_FIXED_DELAY, "1d")
+                .build();
+        servicePlan.saveRequestParamters(request);
+
+        String value = pRepo.findByReferenceAndKey(siId, Parameter.KEY_FIXED_DELAY).getValue();
+        Assert.assertEquals("1d", value);
+    }
 
     @Test
     public void brokenContainersNegTest() throws IOException {

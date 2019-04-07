@@ -5,15 +5,17 @@ import de.grimmpp.cloudFoundry.resourceScheduler.mocks.CfApiMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Application;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Resource;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Binding;
+import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
+import de.grimmpp.cloudFoundry.resourceScheduler.model.database.ParameterRepository;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.ServiceInstance;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.servicebroker.model.binding.CreateServiceInstanceBindingRequest;
 import org.springframework.cloud.servicebroker.model.catalog.Catalog;
 import org.springframework.cloud.servicebroker.model.catalog.Plan;
-import org.springframework.cloud.servicebroker.model.catalog.ServiceDefinition;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -34,7 +36,10 @@ public class ServicePlanAppRestarterTest {
     private CfClient cfClient;
 
     @Autowired
-    private ServicePlanAppRestarter appRestarter;
+    protected ParameterRepository pRepo;
+
+    @Autowired
+    private ServicePlanAppRestarter servicePlan;
 
     private String siId = UUID.randomUUID().toString();
     private String appId = "ae93a4ec-42c2-4087-b4f6-03d79c6aa822";
@@ -45,10 +50,23 @@ public class ServicePlanAppRestarterTest {
     public void catalogTest() {
         boolean b = false;
         for(Plan p: catalog.getServiceDefinitions().get(0).getPlans()) {
-            b = p.getId().equals(appRestarter.getServicePlanId());
+            b = p.getId().equals(servicePlan.getServicePlanId());
             if (b) break;
         }
         Assert.assertTrue(b);
+    }
+
+    @Test
+    public void saveRequestParamtersTest() {
+        CreateServiceInstanceBindingRequest request = CreateServiceInstanceBindingRequest.builder()
+                .serviceInstanceId(siId)
+                .planId(ServicePlanRollingContainerRestarter.PLAN_ID)
+                .parameters(Parameter.KEY_FIXED_DELAY, "1d")
+                .build();
+        servicePlan.saveRequestParamters(request);
+
+        String value = pRepo.findByReferenceAndKey(siId, Parameter.KEY_FIXED_DELAY).getValue();
+        Assert.assertEquals("1d", value);
     }
 
     @Test
@@ -71,7 +89,7 @@ public class ServicePlanAppRestarterTest {
 
         long time = 10 * 1000;  //10sec
 
-        appRestarter.performActionForBinding(si, b, app, time);
+        servicePlan.performActionForBinding(si, b, app, time);
 
         for (int i=0; i<4; i++) {
             String httpMethod = cfApiMockController.lastOperations.get(i).get(CfApiMockController.KEY_HTTP_METHOD);
