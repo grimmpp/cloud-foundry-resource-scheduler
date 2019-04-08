@@ -28,7 +28,8 @@ public class ServiceInstance {
         setServicePlanId(si.getPlanId());
     }
 
-    @Id
+    @Id @GeneratedValue
+    private long id;
     @Column(unique = true)
     private String serviceInstanceId;
     private String orgId;

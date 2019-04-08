@@ -112,6 +112,34 @@ public class DatabaseTest {
         Assert.assertEquals(serviceInstanceId, b2.getServiceInstanceId());
     }
 
+    @Test
+    public void appInstanceDataSegmentationTest() {
+        cleanDatabase();
+
+        String planId = UUID.randomUUID().toString();
+
+        for (int i=0;i<12;i++) createRandomServiceInstance(planId);
+
+        List<ServiceInstance> sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, 0, 1);
+        Assert.assertEquals(12, sis.size());
+
+        sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, 1, 2);
+        Assert.assertEquals(6, sis.size());
+
+        sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, 2, 3);
+        Assert.assertEquals(4, sis.size());
+    }
+
+    private void createRandomServiceInstance(String servicePlan) {
+        serviceInstanceRepository.save(
+            ServiceInstance.builder()
+                    .serviceInstanceId(UUID.randomUUID().toString())
+                    .orgId(UUID.randomUUID().toString())
+                    .spaceId(UUID.randomUUID().toString())
+                    .servicePlanId(servicePlan)
+                    .build());
+    }
+
     public void cleanDatabase() {
         serviceInstanceRepository.deleteAll();
         bindingRepository.deleteAll();
