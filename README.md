@@ -24,7 +24,8 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 * **Spring Boot** is used as Java Framework
   * **Spring Boot Security** (Basic Auth) is implemented.
   * **Spring Boot JPA & Hibernate** is used for DB connection.
-  * **Cloud Foundry API Client** is self-developed and contained within this project. (This was done because I wanted to be able to run all junit tests locally.)
+  * **Cloud Foundry API Client** is self-developed and contained within this project. (This was done because I wanted to be able to run all locally based on the junit test data.)
+    * For every call an identification header which contains the app guid and container index of this scheduler application is sent so that it is visible for the receiver app which app was the sender.
 * In the section/module test there is an additional RestController which **mocks** the **Cloud Foundry API** in order to test the full roundtrip of API calls to Cloud Foundry. (OAuth tests are not included.)
 * **Lombock** is used to keed class definitions simpler.
 * **Planned Things**
@@ -32,7 +33,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
   * Multi application instances => currently it's a single container application.
   * sync job which checks if broker db is in same state like cf db, only regarding its own instances.
   * reduction of memory consumption
-  * Tracing for http communication + header field which identifies sender
+  * Tracing for http communication
 
 ## How to build and run unit tests
 ````
