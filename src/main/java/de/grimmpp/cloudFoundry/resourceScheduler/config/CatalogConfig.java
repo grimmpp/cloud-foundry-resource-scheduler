@@ -91,6 +91,8 @@ public class CatalogConfig {
                                                 "This service plan stopps all apps within its space at the defined times.",
                                                 "Parameter \"{\"times\": [\"09:05\", \"12:05\", \"15:05\", \"20:05\"] is a list of points in time [hour:min]. When one of those times are reached then all apps will be stopped.",
                                         })
+                                        .bindable(false)
+                                        .free(true)
                                         .build()
 /*
                                 , Plan.builder()
