@@ -44,6 +44,7 @@ public class ServicePlanAppRestarterTest {
 
     private String siId = UUID.randomUUID().toString();
     private String appId = "ae93a4ec-42c2-4087-b4f6-03d79c6aa822";
+    private String multiInstanceAppId = "187f4a00-58b2-11e9-8647-d663bd873d93";
     private String spaceId = "359b04a4-1006-4c57-b14d-9dfec46f8e78";
 
 
@@ -82,10 +83,10 @@ public class ServicePlanAppRestarterTest {
         Binding b = Binding.builder()
                 .bindingId(UUID.randomUUID().toString())
                 .serviceInstanceId(siId)
-                .applicationId(appId)
+                .applicationId(multiInstanceAppId)
                 .build();
 
-        String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, b.getApplicationId());
+        String appUrl = cfClient.buildUrl(CfClient.URI_SINGLE_APP, false, b.getApplicationId());
         Resource<Application> app = cfClient.getResource(appUrl, Application.class);
 
         long time = 10 * 1000;  //10sec
@@ -97,8 +98,8 @@ public class ServicePlanAppRestarterTest {
             Assert.assertEquals(RequestMethod.DELETE.toString(), httpMethod);
 
             String expectedUrl = cfApiMockController.lastOperations.get(i).get(CfApiMockController.KEY_URL);
-            String url = AbstractMockController.BASE_URL + "/v2/apps/"+appId+"/instances/"+(3-i);
-                    Assert.assertEquals(url, expectedUrl);
+            String url = AbstractMockController.BASE_URL + "/v2/apps/"+multiInstanceAppId+"/instances/"+(3-i);
+            Assert.assertEquals(url, expectedUrl);
         }
     }
 }

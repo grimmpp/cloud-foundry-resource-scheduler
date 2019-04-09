@@ -2,14 +2,13 @@ package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.cloudFoundry.resourceScheduler.config.AppConfig;
 import de.grimmpp.cloudFoundry.resourceScheduler.config.SSLUtil;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.VcapApplication;
-import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
-import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.ApiInfo;
-import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Resource;
-import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.Result;
+import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.*;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.ServiceInstance;
+import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +49,9 @@ public class CfClient {
     public static final String URI_API_INFO = "/v2/info";
 
     public static final String HEADER_NAME_CF_SENDER_APP = "X-CF-SENDER-APP-INSTANCE";
+
+    @Autowired
+    private AppConfig appConfig;
 
     @Autowired
     private VcapApplication vcapApp;
@@ -201,5 +203,11 @@ public class CfClient {
         ApiInfo apiInfo = new RestTemplate().getForEntity(buildUrl(URI_API_INFO), ApiInfo.class).getBody();
         String baseUrl = apiInfo.getToken_endpoint();
         return baseUrl + URI_OAUTH_TOKEN;
+    }
+
+    public int getRunningInstanceOfResourceSchedulerApp() throws IOException {
+        String url = buildUrl(URI_SINGLE_APP, false, vcapApp.getApplication_id());
+        Resource<Application> app = getResource(url, Application.class);
+        return app.getEntity().getInstances();
     }
 }

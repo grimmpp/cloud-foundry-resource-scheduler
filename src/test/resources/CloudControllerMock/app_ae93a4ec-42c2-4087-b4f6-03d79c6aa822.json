@@ -15,7 +15,7 @@
     "detected_buildpack_guid": "f4adf7e5-1087-465e-a355-7325611d9322",
     "environment_json": {},
     "memory": 1024,
-    "instances": 4,
+    "instances": 1,
     "disk_quota": 1024,
     "state": "STARTED",
     "version": "8475fcd7-c684-43b4-8c41-e69741e1a072",

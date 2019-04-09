@@ -32,4 +32,13 @@ public class AppConfig {
     public VcapApplication getVcapApplication() throws IOException {
         return objectMapper.readValue(vcapApp, VcapApplication.class);
     }
+
+    private Integer amountOfInstances = null;
+    public Integer getAmountOfInstances() {
+        return amountOfInstances;
+    }
+
+    public void updateAmountOfInstances(int instances) {
+        amountOfInstances = instances;
+    }
 }

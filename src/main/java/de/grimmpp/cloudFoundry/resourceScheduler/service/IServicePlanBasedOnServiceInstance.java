@@ -1,6 +1,7 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.cloudFoundry.resourceScheduler.config.AppConfig;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ServicePlanFinder;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
@@ -30,8 +31,14 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
     @Autowired
     protected ParameterRepository pRepo;
 
+    @Autowired
+    protected AppConfig appConfig;
+
     @Value("${scheduling-enabled}")
     private Boolean schedulingEnabled;
+
+    @Value("${CF_INSTANCE_INDEX}")
+    private Integer instanceIndex;
 
     protected ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
@@ -43,12 +50,6 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
         if (schedulingEnabled) log.debug("Service Plan {} is activated.", getClass().getSimpleName());
         else log.debug("Service Plan {} is NOT activated.", getClass().getSimpleName());
     }
-/*
-    @Scheduled(fixedDelay = 60 * 1000) // 1 min
-    public void scheduledRun() throws IOException {
-        log.debug("Scheduler triggered: {}", getClass().getSimpleName());
-        if (schedulingEnabled) run();
-    }*/
 
     @Override
     public void run() throws IOException {
@@ -57,7 +58,7 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
 
         long startTime = System.currentTimeMillis();
 
-        for(ServiceInstance si: siRepo.findByServicePlanId(planId)) {
+        for(ServiceInstance si: siRepo.findByServicePlanIdAndAppInstanceIndex(planId, instanceIndex, appConfig.getAmountOfInstances())) {
             log.debug("Check service instance: {}, plan: {}, org: {}, space: {}",
                     si.getServiceInstanceId(),
                     si.getServicePlanId(),

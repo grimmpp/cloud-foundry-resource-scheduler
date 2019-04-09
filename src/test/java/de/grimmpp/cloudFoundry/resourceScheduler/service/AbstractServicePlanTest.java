@@ -1,10 +1,12 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 import de.grimmpp.cloudFoundry.resourceScheduler.AppManagerApplication;
+import de.grimmpp.cloudFoundry.resourceScheduler.config.AppConfig;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ServicePlanFinder;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,21 @@ public class AbstractServicePlanTest {
     @Autowired
     private ServicePlanTestBasedOnBinding spTestBasedOnB;
 
+    @Autowired
+    private CfClient cfClient;
+
+    @Autowired
+    private AppConfig appConfig;
+
     private String appId = "15b3885d-0351-4b9b-8697-86641668c123";
+
+    @Before
+    public void init() throws IOException {
+        appConfig.updateAmountOfInstances(
+                cfClient.getRunningInstanceOfResourceSchedulerApp() );
+
+        Assert.assertEquals(1L, (long)appConfig.getAmountOfInstances());
+    }
 
     @Test
     public void basedOnServiceInstanceTest() throws IOException {
