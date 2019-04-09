@@ -53,12 +53,6 @@ public class CfClient {
     @Autowired
     private AppConfig appConfig;
 
-    @Autowired
-    private VcapApplication vcapApp;
-
-    @Value("${CF_INSTANCE_INDEX}")
-    private Integer cfInstanceIndex;
-
     @Value("${cfClient.SSL-Validation-enabled}")
     private Boolean enableSslValidation;
 
@@ -119,8 +113,12 @@ public class CfClient {
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
+
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(HEADER_NAME_CF_SENDER_APP, vcapApp.getApplication_id()+":"+cfInstanceIndex);
+
+        String idValue = appConfig.getVcapApplication().getApplication_id()+":"+appConfig.getCfInstanceIndex();
+        headers.set(HEADER_NAME_CF_SENDER_APP, idValue);
+
         return headers;
     }
 
@@ -189,7 +187,7 @@ public class CfClient {
     }
 
     public String buildUrl(String resorucePath, boolean enablePaging, String... args) {
-        String url = vcapApp.getCf_api() + resorucePath;
+        String url = appConfig.getVcapApplication().getCf_api() + resorucePath;
         url = String.format(url, args);
         if (enablePaging) url += String.format(URL_PARAMETERS, 1);
         return url;
@@ -206,7 +204,7 @@ public class CfClient {
     }
 
     public int getRunningInstanceOfResourceSchedulerApp() throws IOException {
-        String url = buildUrl(URI_SINGLE_APP, false, vcapApp.getApplication_id());
+        String url = buildUrl(URI_SINGLE_APP, false, appConfig.getVcapApplication().getApplication_id());
         Resource<Application> app = getResource(url, Application.class);
         return app.getEntity().getInstances();
     }

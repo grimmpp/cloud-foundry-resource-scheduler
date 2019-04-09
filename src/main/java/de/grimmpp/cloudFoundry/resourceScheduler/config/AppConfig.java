@@ -3,6 +3,7 @@ package de.grimmpp.cloudFoundry.resourceScheduler.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.VcapApplication;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 
-
+@Slf4j
 @Configuration
 public class AppConfig {
 
@@ -26,11 +27,19 @@ public class AppConfig {
     }
 
     @Value("${VCAP_APPLICATION}")
-    private String vcapApp;
+    private String vcapAppStr;
 
+    private VcapApplication vcapApp = null;
     @Bean
-    public VcapApplication getVcapApplication() throws IOException {
-        return objectMapper.readValue(vcapApp, VcapApplication.class);
+    public VcapApplication getVcapApplication() {
+        if (vcapApp == null) {
+            try {
+                vcapApp = objectMapper.readValue(vcapAppStr, VcapApplication.class);
+            } catch (IOException e) {
+                log.error("Cannot convert VCAP_APPLICATION to object.", e);
+            }
+        }
+        return vcapApp;
     }
 
     private Integer amountOfInstances = null;
@@ -40,5 +49,11 @@ public class AppConfig {
 
     public void updateAmountOfInstances(int instances) {
         amountOfInstances = instances;
+    }
+
+    @Value("${CF_INSTANCE_INDEX}")
+    private Integer cfInstanceIndex;
+    public Integer getCfInstanceIndex() {
+        return cfInstanceIndex;
     }
 }
