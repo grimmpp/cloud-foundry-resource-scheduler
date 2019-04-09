@@ -34,12 +34,6 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
     @Autowired
     protected AppConfig appConfig;
 
-    @Value("${scheduling-enabled}")
-    private Boolean schedulingEnabled;
-
-    @Value("${CF_INSTANCE_INDEX}")
-    private Integer instanceIndex;
-
     protected ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     protected abstract void performActionForServiceInstance(ServiceInstance si) throws IOException;
@@ -47,7 +41,7 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
     @PostConstruct
     public void init() {
         ServicePlanFinder.registerServicePlan(getServicePlanId(), this);
-        if (schedulingEnabled) log.debug("Service Plan {} is activated.", getClass().getSimpleName());
+        if (appConfig.isSchedulingEnabled()) log.debug("Service Plan {} is activated.", getClass().getSimpleName());
         else log.debug("Service Plan {} is NOT activated.", getClass().getSimpleName());
     }
 
@@ -58,7 +52,7 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
 
         long startTime = System.currentTimeMillis();
 
-        for(ServiceInstance si: siRepo.findByServicePlanIdAndAppInstanceIndex(planId, instanceIndex, appConfig.getAmountOfInstances())) {
+        for(ServiceInstance si: siRepo.findByServicePlanIdAndAppInstanceIndex(planId, appConfig.getCfInstanceIndex(), appConfig.getAmountOfInstances())) {
             log.debug("Check service instance: {}, plan: {}, org: {}, space: {}",
                     si.getServiceInstanceId(),
                     si.getServicePlanId(),

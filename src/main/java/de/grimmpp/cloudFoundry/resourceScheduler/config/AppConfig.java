@@ -56,4 +56,10 @@ public class AppConfig {
     public Integer getCfInstanceIndex() {
         return cfInstanceIndex;
     }
+
+    @Value("${scheduling-enabled}")
+    private Boolean schedulingEnabled;
+    public boolean isSchedulingEnabled() {
+        return schedulingEnabled;
+    }
 }

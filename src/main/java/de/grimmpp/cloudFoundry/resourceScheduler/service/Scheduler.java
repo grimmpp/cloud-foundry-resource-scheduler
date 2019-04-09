@@ -14,19 +14,17 @@ import java.io.IOException;
 @Slf4j
 public class Scheduler {
 
-    @Value("${scheduling-enabled}")
-    private Boolean schedulingEnabled;
-
     @Autowired
     private CfClient cfClient;
 
     @Autowired
     private AppConfig appConfig;
 
+
     @Scheduled(fixedDelay = 30 * 1000) // 30sec
     public void scheduledRun() throws IOException {
         log.debug("Scheduler was triggered.");
-        if (schedulingEnabled) {
+        if (appConfig.isSchedulingEnabled()) {
 
             appConfig.updateAmountOfInstances( cfClient.getRunningInstanceOfResourceSchedulerApp() );
 
