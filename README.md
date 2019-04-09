@@ -19,6 +19,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 
 ## Technical data
 * Used Spring Cloud Open **Service Broker API**
+* The application is a multi-instance application. It can be scaled to more than one application instance.
 * **Spring Boot** is used as Java Framework
   * **Spring Boot Security** (Basic Auth) is implemented.
   * **Spring Boot JPA & Hibernate** is used for DB connection.
@@ -30,7 +31,6 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 * **Lombock** is used to keed class definitions simpler.
 * **Planned Things**
   * Multi-threaded scheduler for all service plans
-  * Multi application instances => currently it's a single container application.
   * sync job which checks if broker db is in same state like cf db, only regarding its own instances.
   * reduction of memory consumption
   * Tracing for http communication
