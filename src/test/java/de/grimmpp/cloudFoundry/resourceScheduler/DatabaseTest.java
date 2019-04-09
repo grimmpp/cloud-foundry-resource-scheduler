@@ -3,6 +3,7 @@ package de.grimmpp.cloudFoundry.resourceScheduler;
 import com.zaxxer.hikari.HikariDataSource;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.*;
+import de.grimmpp.cloudFoundry.resourceScheduler.service.ServicePlanRollingContainerRestarter;
 import de.grimmpp.cloudFoundry.resourceScheduler.service.TimeParameterValidator;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
@@ -118,16 +119,26 @@ public class DatabaseTest {
 
         String planId = UUID.randomUUID().toString();
 
-        for (int i=0;i<12;i++) createRandomServiceInstance(planId);
+        int serviceCount = 12;
+        for (int i=0;i<serviceCount;i++) createRandomServiceInstance(planId);
 
-        List<ServiceInstance> sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, 0, 1);
-        Assert.assertEquals(12, sis.size());
+        int index = 0;
+        int amountOfContainers = 1;
+        List<ServiceInstance> sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, index, amountOfContainers);
+        Assert.assertEquals(serviceCount/amountOfContainers, sis.size());
+        for (ServiceInstance si: sis) Assert.assertEquals(index, si.getId() % amountOfContainers);
 
-        sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, 1, 2);
-        Assert.assertEquals(6, sis.size());
+        index = 0;
+        amountOfContainers = 2;
+        sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, index, amountOfContainers);
+        Assert.assertEquals(serviceCount/amountOfContainers, sis.size());
+        for (ServiceInstance si: sis) Assert.assertEquals(index, si.getId() % amountOfContainers);
 
-        sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, 2, 3);
-        Assert.assertEquals(4, sis.size());
+        index = 2;
+        amountOfContainers = 3;
+        sis = serviceInstanceRepository.findByServicePlanIdAndAppInstanceIndex(planId, index, amountOfContainers);
+        Assert.assertEquals(serviceCount/amountOfContainers, sis.size());
+        for (ServiceInstance si: sis) Assert.assertEquals(index, si.getId() % amountOfContainers);
     }
 
     private void createRandomServiceInstance(String servicePlan) {
