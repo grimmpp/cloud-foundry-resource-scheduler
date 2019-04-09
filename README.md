@@ -36,6 +36,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
   * sync job which checks if broker db is in same state like cf db, only regarding its own instances.
   * reduction of memory consumption
   * Tracing for http communication
+  * Consolidate configuration.
 
 ## How to build and run unit tests
 ````
