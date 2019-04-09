@@ -37,6 +37,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
   * reduction of memory consumption
   * Tracing for http communication
   * Consolidate configuration.
+  * Improve detection of what should be triggered so that there are not that many calls against cloud foundry or its own database.
 
 ## How to build and run unit tests
 ````
