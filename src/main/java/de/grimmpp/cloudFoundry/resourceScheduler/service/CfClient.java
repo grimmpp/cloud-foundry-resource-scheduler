@@ -48,8 +48,6 @@ public class CfClient {
     public static final String URI_OAUTH_TOKEN = "/oauth/token";
     public static final String URI_API_INFO = "/v2/info";
 
-    public static final String HEADER_NAME_CF_SENDER_APP = "X-CF-SENDER-APP-INSTANCE";
-
     @Autowired
     private AppConfig appConfig;
 
@@ -116,8 +114,7 @@ public class CfClient {
 
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String idValue = appConfig.getVcapApplication().getApplication_id()+":"+appConfig.getCfInstanceIndex();
-        headers.set(HEADER_NAME_CF_SENDER_APP, idValue);
+        headers.add(AppConfig.HEADER_NAME_CF_SENDER_APP, appConfig.getSenderAppHttpHeaderValue());
 
         return headers;
     }

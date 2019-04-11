@@ -1,5 +1,6 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
+import de.grimmpp.cloudFoundry.resourceScheduler.config.AppConfig;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.VcapApplication;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.cfClient.*;
 import de.grimmpp.cloudFoundry.resourceScheduler.AppManagerApplication;
@@ -109,7 +110,7 @@ public class CfClientTest {
     @Test
     public void appSenderHeaderTest() throws IOException {
         ApiInfo apiInfo = cfClient.getObject(cfClient.buildUrl(CfClient.URI_API_INFO), ApiInfo.class);
-        String senderId = cfApiMockController.getLastOperation(CfClient.HEADER_NAME_CF_SENDER_APP);
+        String senderId = cfApiMockController.getLastOperation(AppConfig.HEADER_NAME_CF_SENDER_APP);
 
         Assert.assertEquals(vcapApp.getApplication_id()+":"+cfInstanceIndex, senderId);
     }

@@ -1,5 +1,6 @@
 package de.grimmpp.cloudFoundry.resourceScheduler;
 
+import de.grimmpp.cloudFoundry.resourceScheduler.config.AppConfig;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.VcapApplication;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,7 +20,7 @@ import java.util.Arrays;
 public class ConfigTest {
 
     @Autowired
-    private VcapApplication vcapApp;
+    private AppConfig appConfig;
 
     @Value("${server.port}")
     private Integer serverPort;
@@ -41,6 +42,24 @@ public class ConfigTest {
 
     @Test
     public void cfApiAddressTest() throws IOException {
-        Assert.assertEquals("http://localhost:8111/cf_api_mock", vcapApp.getCf_api());
+        Assert.assertEquals("http://localhost:8111/cf_api_mock", appConfig.getVcapApplication().getCf_api());
+    }
+
+    @Test
+    public void senderAppIdentifyerTest() {
+        String headerValue = appConfig.getSenderAppHttpHeaderValue();
+        Assert.assertEquals("ae93a4ec-42c2-4087-b4f6-03d79c6aa822:0", headerValue);
+    }
+
+    @Test
+    public void schedulingFlagTest() {
+        // Must be false for testing
+        Assert.assertEquals(false, appConfig.isSchedulingEnabled());
+    }
+
+    @Test
+    public void configuredLoggingLevelTest() {
+        // Is set to debug for testing
+        Assert.assertEquals("DEBUG", appConfig.getProjectLogLevel());
     }
 }

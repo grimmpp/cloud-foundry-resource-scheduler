@@ -15,6 +15,11 @@ import java.io.IOException;
 @Configuration
 public class AppConfig {
 
+    public static final String HEADER_NAME_CF_SENDER_APP = "X-CF-SENDER-APP-INSTANCE";
+    public String getSenderAppHttpHeaderValue() {
+        return getVcapApplication().getApplication_id()+":"+getCfInstanceIndex();
+    }
+
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
 
     @Value("${logging.level.de.grimmpp.cloudFoundry.resourceScheduler}")
@@ -28,7 +33,6 @@ public class AppConfig {
 
     @Value("${VCAP_APPLICATION}")
     private String vcapAppStr;
-
     private VcapApplication vcapApp = null;
     @Bean
     public VcapApplication getVcapApplication() {
@@ -42,7 +46,13 @@ public class AppConfig {
         return vcapApp;
     }
 
+
     private Integer amountOfInstances = null;
+
+    /**
+     * This value must be set first by making a call to the CF API. That is done in the scheduler.
+     * @return amount of configured instances of this app.
+     */
     public Integer getAmountOfInstances() {
         return amountOfInstances;
     }

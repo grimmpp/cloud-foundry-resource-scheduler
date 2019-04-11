@@ -2,6 +2,7 @@ package de.grimmpp.cloudFoundry.resourceScheduler.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.cloudFoundry.resourceScheduler.config.AppConfig;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.ServiceInstance;
@@ -91,15 +92,11 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
             String time = Parameter.getParameterValueByKey(params, timeKey);
             log.debug("Time is expired after -> mode: '{}' parameter: {}.", timeKey, time);
             try {
-                HttpHeaders headers = new HttpHeaders();
-                String headersStr = Parameter.getParameterValueByKey(params, Parameter.KEY_HTTP_HEADERS);
-                for (String header : objectMapper.readValue(headersStr, String[].class)) {
-                    headers.set(header.split(": ")[0], header.split(": ")[1]);
-                }
-                HttpEntity<String> entity = new HttpEntity<>(headers);
+                HttpEntity<String> entity = new HttpEntity<>(getHeaders(params));
                 String url = Parameter.getParameterValueByKey(params, Parameter.KEY_URL);
                 String httpMethod = Parameter.getParameterValueByKey(params, Parameter.KEY_HTTP_METHOD);
                 Boolean sslEnabled = Boolean.valueOf(Parameter.getParameterValueByKey(params, Parameter.KEY_SSL_ENABLED));
+
                 log.debug("Do {} call to url {}", httpMethod, url);
                 getRestTemplate(sslEnabled).exchange(url, HttpMethod.valueOf(httpMethod), entity, String.class);
 
@@ -112,6 +109,20 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
         } else {
             log.debug("time is not expired.");
         }
+    }
+
+    private HttpHeaders getHeaders(List<Parameter> parameters) throws IOException {
+
+        String parameterHeadersAsStr = Parameter.getParameterValueByKey(parameters, Parameter.KEY_HTTP_HEADERS);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        for (String header : objectMapper.readValue(parameterHeadersAsStr, String[].class)) {
+            headers.set(header.split(": ")[0], header.split(": ")[1]);
+        }
+        headers.add(AppConfig.HEADER_NAME_CF_SENDER_APP, appConfig.getSenderAppHttpHeaderValue());
+
+        return headers;
     }
 
     @Override

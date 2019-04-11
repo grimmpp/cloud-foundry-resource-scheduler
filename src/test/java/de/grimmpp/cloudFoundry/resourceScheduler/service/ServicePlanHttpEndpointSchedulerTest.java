@@ -3,6 +3,7 @@ package de.grimmpp.cloudFoundry.resourceScheduler.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.grimmpp.cloudFoundry.resourceScheduler.AppManagerApplication;
+import de.grimmpp.cloudFoundry.resourceScheduler.config.AppConfig;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.mocks.HttpEndpointSchedulerMockController;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.database.Parameter;
@@ -20,7 +21,6 @@ import org.springframework.cloud.servicebroker.model.instance.CreateServiceInsta
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +48,9 @@ public class ServicePlanHttpEndpointSchedulerTest {
 
     @Autowired
     private HttpEndpointSchedulerMockController mockController;
+
+    @Autowired
+    private AppConfig appConfig;
 
     private String url = "http://localhost:8111/httpEndpointScheduler";
 
@@ -196,6 +199,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
 
         Assert.assertEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
         Assert.assertEquals("PUT", mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_HTTP_METHOD));
+        Assert.assertEquals(appConfig.getSenderAppHttpHeaderValue(), mockController.getLastOperation(AppConfig.HEADER_NAME_CF_SENDER_APP));
     }
 
     @Test
@@ -220,6 +224,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
 
         Assert.assertEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
         Assert.assertEquals("GET", mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_HTTP_METHOD));
+        Assert.assertEquals(appConfig.getSenderAppHttpHeaderValue(), mockController.getLastOperation(AppConfig.HEADER_NAME_CF_SENDER_APP));
     }
 
 
@@ -250,6 +255,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
 
         if (mockController.lastOperations.size() > 0) {
             Assert.assertNotEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
+            Assert.assertEquals(appConfig.getSenderAppHttpHeaderValue(), mockController.getLastOperation(AppConfig.HEADER_NAME_CF_SENDER_APP));
         }
     }
 
@@ -280,6 +286,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
 
         Assert.assertEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
         Assert.assertEquals("GET", mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_HTTP_METHOD));
+        Assert.assertEquals(appConfig.getSenderAppHttpHeaderValue(), mockController.getLastOperation(AppConfig.HEADER_NAME_CF_SENDER_APP));
     }
 
     @Test
@@ -308,6 +315,7 @@ public class ServicePlanHttpEndpointSchedulerTest {
         servicePlan.performActionForServiceInstance(si);
 
         Assert.assertNotEquals(_url, mockController.getLastOperation(HttpEndpointSchedulerMockController.KEY_URL));
+        Assert.assertEquals(appConfig.getSenderAppHttpHeaderValue(), mockController.getLastOperation(AppConfig.HEADER_NAME_CF_SENDER_APP));
     }
 
     @Test

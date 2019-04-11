@@ -1,6 +1,7 @@
 package de.grimmpp.cloudFoundry.resourceScheduler.mocks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.grimmpp.cloudFoundry.resourceScheduler.config.AppConfig;
 import de.grimmpp.cloudFoundry.resourceScheduler.helper.ObjectMapperFactory;
 import de.grimmpp.cloudFoundry.resourceScheduler.model.VcapApplication;
 import de.grimmpp.cloudFoundry.resourceScheduler.service.CfClient;
@@ -47,8 +48,8 @@ public abstract class AbstractMockController {
             put(KEY_HTTP_METHOD, request.getMethod());
             put(KEY_RESPONSE_BODY, respBody);
 
-            String value = request.getHeader(CfClient.HEADER_NAME_CF_SENDER_APP);
-            put(CfClient.HEADER_NAME_CF_SENDER_APP, value);
+            String value = request.getHeader(AppConfig.HEADER_NAME_CF_SENDER_APP);
+            put(AppConfig.HEADER_NAME_CF_SENDER_APP, value);
 
         }});
     }
