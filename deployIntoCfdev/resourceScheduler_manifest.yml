@@ -1,6 +1,6 @@
 applications:
   - name: resourceScheduler
-    disk_quota: 1G
+    disk_quota: 256M
     env:
       BROKER_BASIC_AUTH_PASSWORD: admin
       BROKER_BASIC_AUTH_USERNAME: admin
@@ -14,8 +14,9 @@ applications:
       spring.jpa.hibernate.ddl-auto: update
       spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MariaDBDialect
       spring.jpa.properties.hibernate.globally_quoted_identifiers: "true"
+      JAVA_OPTS: '-XX:ReservedCodeCacheSize=50M'
     instances: 1
-    memory: 1G
+    memory: 512M
     routes:
       - route: resourceScheduler.dev.cfdev.sh
     services:
