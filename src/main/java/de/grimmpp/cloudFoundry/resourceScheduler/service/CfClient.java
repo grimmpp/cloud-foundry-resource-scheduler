@@ -66,6 +66,10 @@ public class CfClient {
 
     public CfClient() { }
 
+    /*
+    Unfortunately ssl must be switch off this way because disabling it at the restTemplate is not working when using OAuth in conjunction.
+    THIS SHOULD ONLY BE USED FOR TESTING!!!
+     */
     @PostConstruct
     public void initialize() throws KeyManagementException, NoSuchAlgorithmException {
         log.debug("initialize cfClient");

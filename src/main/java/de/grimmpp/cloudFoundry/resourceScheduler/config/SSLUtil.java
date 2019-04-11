@@ -20,6 +20,9 @@ public final class SSLUtil{
             }
     };
 
+    /*
+     THIS SHOULD ONLY BE USED FOR TESTING!!!
+      */
     public  static void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
         // Install the all-trusting trust manager
         final SSLContext sc = SSLContext.getInstance("SSL");
