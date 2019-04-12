@@ -1,8 +1,11 @@
 # All logs from this project are set to INFO by default.
 logging.level.de.grimmpp.cloudFoundry.resourceScheduler: INFO
 
-# scheduling is enabled by default.ffafafafafaf
+# scheduling is enabled by default.
 scheduling-enabled: true
+
+# this is needed because Pivotal Cloud Foundry only supports 255 chars for descriptions in their database.
+trim-catalog-descriptions: false
 
 # users for broker will be read from environment variables.
 broker.api.admin-user:
