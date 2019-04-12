@@ -17,7 +17,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 * **HttpEndpointScheduler**: Triggers frequently arbitrary http endpoints after a defined periode of time or for specific points in time e.g. 5pm.
 
 
-## Technical data
+## Technical Data & Features
 * Used Spring Cloud Open **Service Broker API**
 * The application is a **multi-instance application**. It can be scaled to more than one application instance.
 * **Load Distribution**: If the app runs in more than one instance then the instances will split up the service instances to be processed. For that an application instance needs to know how many instances are configured in total. It makes frequently calls against the Cloud Foundry API to find that out. 
