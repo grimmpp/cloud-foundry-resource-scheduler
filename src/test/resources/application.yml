@@ -1,17 +1,23 @@
+
+# mock data which is provided by cloud foundry.
 VCAP_APPLICATION: '{"application_id":"ae93a4ec-42c2-4087-b4f6-03d79c6aa822","application_name":"app-manager","application_uris":["app-manager.dev.cfdev.sh"],"application_version":"3e42923e-f0da-4deb-923a-cbed0fa128b2","cf_api":"http://localhost:8111/cf_api_mock","limits":{"disk":1024,"fds":16384,"mem":1024},"name":"app-manager","space_id":"359b04a4-1006-4c57-b14d-9dfec46f8e78","space_name":"cfdev-space","uris":["app-manager.dev.cfdev.sh"],"users":null,"version":"3e42923e-f0da-4deb-923a-cbed0fa128b2"}'
 VCAP_SERVICES: '{"h2":[{"credentials":{"name":"cf_c9179b31_9203_4d59_b0f9_f0d9ba504b41","password":"sa","uri":"jdbc:h2:mem:db;DB_CLOSE_DELAY=-1","username":"sa"},"instance_name":"scheduler-db","label":"h2","name":"h2","plan":"10mb","tags":["h2"]}]}'
 CF_INSTANCE_INDEX: 0
 
+# enables all actuator web interfaces
 management.endpoints.web.exposure.include: '*'
 
 logging.level.de.grimmpp.cloudFoundry.resourceScheduler: DEBUG
 
+# disables scheduling for testing because in junit tests the function will be called directly.
 scheduling-enabled: false
 
+# user for broker which needs to be registered at cloud foundry.
 broker.api.admin-user:
   username: admin
   password: admin
 
+# settings for http-client which talks to cloud foundry.
 cfClient:
   SSL-Validation-enabled: false
   oauth-enabled: false
@@ -19,10 +25,12 @@ cfClient:
     username: admin
     password: admin
 
+# fixed port so that junit tests can go against a fixed address.
 server:
   protocol: http
   port: 8111
 
+# H2 in-memory database for junit tests.
 spring:
   jpa:
     hibernate.ddl-auto: create-drop

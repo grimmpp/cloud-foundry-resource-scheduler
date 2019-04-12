@@ -1,11 +1,15 @@
+# All logs from this project are set to INFO by default.
 logging.level.de.grimmpp.cloudFoundry.resourceScheduler: INFO
 
+# scheduling is enabled by default.ffafafafafaf
 scheduling-enabled: true
 
+# users for broker will be read from environment variables.
 broker.api.admin-user:
   username: ${BROKER_BASIC_AUTH_USERNAME}
   password: ${BROKER_BASIC_AUTH_PASSWORD}
 
+# default config for cloud foundry. User and password will be read from environment variables.
 cfClient:
   SSL-Validation-enabled: true
   oauth-enabled: true
@@ -13,6 +17,7 @@ cfClient:
     username: ${CF_ADMIN_USERNAME}
     password: ${CF_ADMIN_PASSWORD}
 
+# default and generic database settings.
 spring:
   jpa:
     hibernate.ddl-auto: update
