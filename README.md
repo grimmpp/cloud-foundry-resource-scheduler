@@ -20,7 +20,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 ## Technical data
 * Used Spring Cloud Open **Service Broker API**
 * The application is a **multi-instance application**. It can be scaled to more than one application instance.
-* **Load Distribution**: If the app runs in more than one instance then the instances will split up the service instance and process only their service instances. For that an application instance needs to know how many instances are configured in total and it makes frequently calls against the Cloud Foundry API to find that out. 
+* **Load Distribution**: If the app runs in more than one instance then the instances will split up the service instances to be processed. For that an application instance needs to know how many instances are configured in total. It makes frequently calls against the Cloud Foundry API to find that out. 
 * **Spring Boot** is used as Java Framework
   * **Spring Boot Security** (Basic Auth) is implemented.
   * **Spring Boot JPA & Hibernate** is used for DB connection.
