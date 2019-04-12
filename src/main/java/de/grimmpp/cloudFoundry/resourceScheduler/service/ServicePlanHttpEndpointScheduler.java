@@ -103,6 +103,7 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
                 // Remember last http call made.
                 Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL).setValue(Long.toString(System.currentTimeMillis()));
                 pRepo.save(Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL));
+                log.info("=> Instance {} called via {} {} ", si.getServiceInstanceId(), httpMethod, url);
             } catch (Throwable e) {
                 log.error("Was not able to do http call.", e);
             }
