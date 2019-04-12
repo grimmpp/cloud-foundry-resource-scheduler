@@ -29,6 +29,7 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
     * For specific instances SSL can also be disabled for that please see the service plan description.
 * In the section/module test there is an additional RestController which **mocks** the **Cloud Foundry API** in order to test the full roundtrip of API calls to Cloud Foundry. (OAuth tests are not included.)
 * **Lombock** is used to keed class definitions simpler.
+* Catalog descriptions can be trimmed optionally because of PCF DB field length limitations (255 chars) `trim-catalog-descriptions: true`
 * **Planned Things**
   * Multi-threaded scheduler for all service plans
   * sync job which checks if broker db is in same state like cf db, only regarding its own instances.
