@@ -63,6 +63,8 @@ public class CfClient {
     @Value("${cfClient.cfApi.password}")
     private String cfApiPassword;
 
+    @Value("${application-instances-count:0}")
+    private Integer configuredApplicationInstances;
 
     public CfClient() { }
 
@@ -205,8 +207,13 @@ public class CfClient {
     }
 
     public int getRunningInstanceOfResourceSchedulerApp() throws IOException {
-        String url = buildUrl(URI_SINGLE_APP, false, appConfig.getVcapApplication().getApplication_id());
-        Resource<Application> app = getResource(url, Application.class);
-        return app.getEntity().getInstances();
+        if (configuredApplicationInstances > 0){
+            return configuredApplicationInstances;
+        }
+        else {
+            String url = buildUrl(URI_SINGLE_APP, false, appConfig.getVcapApplication().getApplication_id());
+            Resource<Application> app = getResource(url, Application.class);
+            return app.getEntity().getInstances();
+        }
     }
 }

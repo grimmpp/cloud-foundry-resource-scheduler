@@ -48,7 +48,6 @@ public class AppConfig {
 
 
     private Integer amountOfInstances = null;
-
     /**
      * This value must be set first by making a call to the CF API. That is done in the scheduler.
      * @return amount of configured instances of this app.

@@ -4,6 +4,10 @@ VCAP_APPLICATION: '{"application_id":"ae93a4ec-42c2-4087-b4f6-03d79c6aa822","app
 VCAP_SERVICES: '{"h2":[{"credentials":{"name":"cf_c9179b31_9203_4d59_b0f9_f0d9ba504b41","password":"sa","uri":"jdbc:h2:mem:db;DB_CLOSE_DELAY=-1","username":"sa"},"instance_name":"scheduler-db","label":"h2","name":"h2","plan":"10mb","tags":["h2"]}]}'
 CF_INSTANCE_INDEX: 0
 
+# hardcoded total amount of application instances which are configured.
+# By setting this value the scheduler won't ask cloud foundry for every iteration for the amount of configure instances.
+#application-instances-count: 1
+
 # enables all actuator web interfaces
 management.endpoints.web.exposure.include: '*'
 
