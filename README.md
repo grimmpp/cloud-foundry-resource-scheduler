@@ -71,7 +71,7 @@ Check out application.yml there you can find the necessary environment variable 
 * CF_ADMIN_USERNAME
 * CF_ADMIN_PASSWORD
 
-You may need to set hibernate dialects like: 
+You may need to set a specific hibernate dialect like: 
 * spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MariaDBDialect
 
 ## How to deploy
