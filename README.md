@@ -16,7 +16,6 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 * **SwitchOffWholeSpace**: Switches off all apps in a space at defined times. It will also ignore spaces containing 'prod' in their names. (No bindings needed) This plan can be used for test and demo spaces in order to save resources from the quota.
 * **HttpEndpointScheduler**: Triggers frequently arbitrary http endpoints after a defined periode of time or for specific points in time e.g. 5pm.
 
-
 ## Technical data
 * Used Spring Cloud Open **Service Broker API**
 * The application is a **multi-instance application**. It can be scaled to more than one application instance.
@@ -93,6 +92,13 @@ configured instances. This allows you to use all service plans which have no nee
 you can still benefit from the load distribution of the Resource Scheduler.
 
 **Warning**: If the amount of configured application instances is not in sync. jobs will be triggered less or more than defined.  
+
+## Performance Test
+I instanced 1000 HttpEndpointScheduler service instances pointing to a test-app. The Resource Scheduler triggered every 
+30sec all 1000 jobs. The Resource Scheduler was running in 2 application instances. Every instances was processing 500 jobs
+in one scheduler period. The processing for each application instance took about 7 seconds in total. For this setup the Resource 
+Scheduler could theoretically handle 4285 HttpEndpointScheduler service instances without delay or skipping one instance. 
+For more load the Resource Scheduler can be scaled up to more application instances.
 
 ## Links
 * Service Broker Api Framework: https://spring.io/projects/spring-cloud-open-service-broker
