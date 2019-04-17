@@ -7,12 +7,11 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'grimmpp'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 ext {
 	springCloudFoundryServiceBrokerVersion = "1.2.7.RELEASE"
-	version = '0.1.0.BUILD-SNAPSHOT'
 }
 
 configurations {
