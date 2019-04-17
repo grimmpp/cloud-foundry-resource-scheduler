@@ -77,6 +77,23 @@ You may need to set hibernate dialects like:
 ## How to deploy
 For cfdev see: <a href="./deployIntoCfdev/deploy.bat">./deployIntoCfdev/deploy.bat</a>
 
+## How to use only NONE Cloud Foundry Service Plans
+If you don't want to use the Cloud Foundry API, you can run the Resource Scheduler also without Cloud Foundry user.
+In any case you need to register the Resource Scheduler as a service broker to Cloud Foundry so that you are able to do 
+the configuration of the jobs. Jobs will be configured by creating service instances of service plans or by creating 
+bindings to applications. ... For details have a look into the 
+<a href="./src/main/java/de/grimmpp/cloudFoundry/resourceScheduler/config/CatalogConfig.java">service catalog</a>. 
+<br />What you need to configure if you don't want to use Cloud Foundry API at all is the following:
+````
+application-instances-count: 1  # When every you scale up or down the application you need to adjust this value.
+````
+**Advice**: You can create a Cloud Foundry user within the same space of the Resource Scheduler and assign the role 
+'SpaceAuditor' (readonly for that single space) to it so that the Resource Scheduler can query for the amount of 
+configured instances. This allows you to use all service plans which have no need to interact with Cloud Foundry and 
+you can still benefit from the load distribution of the Resource Scheduler.
+
+**Warning**: If the amount of configured application instances is not in sync. jobs will be triggered less or more than defined.  
+
 ## Links
 * Service Broker Api Framework: https://spring.io/projects/spring-cloud-open-service-broker
 * cfdev for installing Cloud Foundry locally: https://github.com/cloudfoundry-incubator/cfdev

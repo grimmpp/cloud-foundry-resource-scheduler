@@ -20,8 +20,8 @@ cfClient:
   SSL-Validation-enabled: true
   oauth-enabled: true
   cfApi:
-    username: ${CF_ADMIN_USERNAME}
-    password: ${CF_ADMIN_PASSWORD}
+    username: ${CF_ADMIN_USERNAME:}
+    password: ${CF_ADMIN_PASSWORD:}
 
 # default and generic database settings.
 spring:
