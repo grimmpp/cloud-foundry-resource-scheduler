@@ -61,7 +61,11 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 ````
 
 ## Prerequisites for depolying 
-For deploying this application you require **Cloud Foundry** and a **relational database**.
+For deploying this application you require a **Cloud Foundry User** and a **relational database**. <br />
+**Deployment Options:**
+1. You can deploy the Resource Scheduler and make it globally available for all organizations in Cloud Foundry. For this scenario you will require a Cloud Foundry Admin account which has got admin rights in order to e.g. restart apps. The actions which will be performed are dependent on the service instances which are provisioned and how they are configured.
+2. You can deploy the Resource Scheduler and register it as <a href="https://docs.cloudfoundry.org/services/managing-service-brokers.html#register-broker">space scoped service broker</a>. For this scenario you only require a Cloud Foundry User which has got SpaceDeveloper role in your spaces where you want to use the Resource Scheduler service plan instances.
+3. If you only want to use the HttpEndpointScheduler then their is no need to configure a Cloud Foundry User at all. The only this you need to provide is the amount of configured application instances of the Resource Scheduler so that it doesn't need to ask the Cloud Foundry API for it. The environment variable is defined like e.g. `application-instances-count=4` (Everytime you scale Resource Scheduler you will need to adapt the environment variable.)
 
 ## What to configure
 Check out application.yml there you can find the necessary environment variable to be set:
