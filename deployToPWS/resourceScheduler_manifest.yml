@@ -14,12 +14,12 @@ applications:
       spring.jpa.hibernate.ddl-auto: update
       spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MariaDBDialect
       spring.jpa.properties.hibernate.globally_quoted_identifiers: "true"
-      #JAVA_OPTS: '-XX:ReservedCodeCacheSize=50M'
-      JAVA_OPTS: '-Xmx200M -XX:MaxMetaspaceSize=120M -Xss50M'
+      application-instances-count: 1
+      JAVA_OPTS: '-Xmx150M -XX:MaxMetaspaceSize=100M -Xss50M -XX:ReservedCodeCacheSize=100M -XX:+PrintGCDetails'
     instances: 1
-    memory: 384M
-#    routes:
-#      - route: resourceScheduler.dev.cfdev.sh
+    memory: 300M
+    routes:
+      - route: resourcescheduler.cfapps.io
     services:
       - mysql
     stack: cflinuxfs3

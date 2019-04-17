@@ -36,5 +36,9 @@ public class Scheduler {
                 }
             }
         }
+
+        // Detailed output can be enabled by: -XX:+PrintGCDetails
+        log.debug("Trigger Garbage Collector: ");
+        System.gc();
     }
 }

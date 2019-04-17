@@ -27,6 +27,8 @@ cf create-service "Resource Scheduler" "SwitchOffAppsInSpace" switchOffAppsAfter
 
 ## Create Instance of HttpEndpointScheduler
 cf create-service "Resource Scheduler" "HttpEndpointScheduler" httpEPsi -c '{\"fixedDelay\":\"10s\", \"url\":\"https://test-app1.dev.cfdev.sh\", \"sslEnabled\": false}'
+## resourceScheduler Memory test
+#for ($i=101; $i -le 1000; $i++) { cf create-service "Resource Scheduler" HttpEndpointScheduler httpEPsi$i -c instanceParameter.json }
 
 
 # cleanup

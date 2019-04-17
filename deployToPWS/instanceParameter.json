@@ -1,0 +1,5 @@
+{
+	"fixedDelay": "10s", 
+	"url":"https://test-app-interested-swan.cfapps.io", 
+	"sslEnabled": false
+}

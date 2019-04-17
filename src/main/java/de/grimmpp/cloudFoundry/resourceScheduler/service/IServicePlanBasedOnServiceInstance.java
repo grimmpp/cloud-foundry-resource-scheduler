@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan {
@@ -52,7 +53,10 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
 
         long startTime = System.currentTimeMillis();
 
-        for(ServiceInstance si: siRepo.findByServicePlanIdAndAppInstanceIndex(planId, appConfig.getCfInstanceIndex(), appConfig.getAmountOfInstances())) {
+        List<ServiceInstance> serviceInstances = siRepo.findByServicePlanIdAndAppInstanceIndex(planId, appConfig.getCfInstanceIndex(), appConfig.getAmountOfInstances());
+        log.debug("{} service instances to be processed. ", serviceInstances.size());
+
+        for(ServiceInstance si: serviceInstances) {
             log.debug("Check service instance: {}, plan: {}, org: {}, space: {}",
                     si.getServiceInstanceId(),
                     si.getServicePlanId(),
@@ -64,8 +68,9 @@ public abstract class IServicePlanBasedOnServiceInstance implements IServicePlan
 
         long d = System.currentTimeMillis() - startTime;
         long dMilli = d % 1000;
-        long dSec = (d / 1000) % 60 ;
+        long dSec = (d / 1000) % 60;
         long dMin = d / (1000 * 60);
-        log.debug("Duration of run {}min {}sec {}milli", dMin, dSec, dMilli);
+        log.debug("Handled {} registered service instances for service plan: {} in duration of {}min {}sec {}milli for application instance {}",
+                serviceInstances.size(), getClass().getSimpleName(), dMin, dSec, dMilli, appConfig.getVcapApplication().getInstance_index());
     }
 }

@@ -1,0 +1,5 @@
+{
+	"fixedDelay": "10s", 
+	"url": "https://test-app1.dev.cfdev.sh", 
+	"sslEnabled": false
+}

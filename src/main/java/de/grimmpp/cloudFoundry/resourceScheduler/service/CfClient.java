@@ -207,10 +207,12 @@ public class CfClient {
     }
 
     public int getRunningInstanceOfResourceSchedulerApp() throws IOException {
+        log.debug("Configured Application Instances: {}", configuredApplicationInstances);
         if (configuredApplicationInstances > 0){
             return configuredApplicationInstances;
         }
         else {
+            log.debug("Ask Cloud Foundry about total amount of configured Resource Schedulers.");
             String url = buildUrl(URI_SINGLE_APP, false, appConfig.getVcapApplication().getApplication_id());
             Resource<Application> app = getResource(url, Application.class);
             return app.getEntity().getInstances();

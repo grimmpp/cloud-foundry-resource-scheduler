@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TestApplication" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="de.grimmpp.cloudFoundry.resourceScheduler.AppManagerApplicationTest" />
+    <module name="grimmpp.resourceScheduler.test" />
+    <option name="VM_PARAMETERS" value="-XX:+PrintGCDetails" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
