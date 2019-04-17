@@ -62,4 +62,9 @@ public class ConfigTest {
         // Is set to debug for testing
         Assert.assertEquals("DEBUG", appConfig.getProjectLogLevel());
     }
+
+    @Test
+    public void maxThreadsPerServicePlanSchedulerTest() {
+        Assert.assertEquals(10, (long)appConfig.getMaxThreadsPerServicePlanScheduler());
+    }
 }

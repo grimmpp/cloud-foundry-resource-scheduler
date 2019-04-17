@@ -4,6 +4,9 @@ logging.level.de.grimmpp.cloudFoundry.resourceScheduler: INFO
 # scheduling is enabled by default.
 scheduling-enabled: true
 
+# max amount of threads which will run in parallel for one service plan.
+max-threads-per-service-plan-scheduler: 25
+
 # this is needed because Pivotal Cloud Foundry only supports 255 chars for descriptions in their database.
 trim-catalog-descriptions: false
 

@@ -54,7 +54,7 @@ public class AbstractServicePlanTest {
     }
 
     @Test
-    public void basedOnServiceInstanceTest() throws IOException {
+    public void basedOnServiceInstanceTest() throws IOException, InterruptedException {
         cleanDatabase();
 
         String id = UUID.randomUUID().toString();
@@ -81,7 +81,7 @@ public class AbstractServicePlanTest {
     }
 
     @Test
-    public void basedOnBidningTest() throws IOException {
+    public void basedOnBidningTest() throws IOException, InterruptedException {
         cleanDatabase();
 
         String id = UUID.randomUUID().toString();

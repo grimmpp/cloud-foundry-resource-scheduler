@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 @Slf4j
@@ -21,6 +22,11 @@ public class AppConfig {
     }
 
     private ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+
+    @PostConstruct
+    public void logConfig() {
+        log.info("AppConfig: \n "+this.toString());
+    }
 
     @Value("${logging.level.de.grimmpp.cloudFoundry.resourceScheduler}")
     private String projectLogLevel;
@@ -55,7 +61,6 @@ public class AppConfig {
     public Integer getAmountOfInstances() {
         return amountOfInstances;
     }
-
     public void updateAmountOfInstances(int instances) {
         amountOfInstances = instances;
     }
@@ -70,5 +75,20 @@ public class AppConfig {
     private Boolean schedulingEnabled;
     public boolean isSchedulingEnabled() {
         return schedulingEnabled;
+    }
+
+    @Value("${max-threads-per-service-plan-scheduler:25}")
+    private Integer maxThreadsPerServicePlanScheduler;
+    public Integer getMaxThreadsPerServicePlanScheduler() {
+        return  maxThreadsPerServicePlanScheduler;
+    }
+
+    public String toString() {
+        return
+        "logging.level.de.grimmpp.cloudFoundry.resourceScheduler: " + projectLogLevel + ", " +
+        "VCAP_APPLICATION: " + vcapAppStr + ", " +
+        "CF_INSTANCE_INDEX: " + cfInstanceIndex + ", " +
+        "scheduling-enabled: " + schedulingEnabled + ", " +
+        "max-threads-per-service-plan-scheduler: " + maxThreadsPerServicePlanScheduler;
     }
 }

@@ -19,7 +19,15 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 
 ## Technical data
 * Used Spring Cloud Open **Service Broker API**
-* The application is a multi-instance application. It can be scaled to more than one application instance.
+* The application is a **multi-instance application**. It can be scaled to more than one application instance.
+* **Partitioning of scheduler jobs**: The scheduler jobs will be divided by the amount of configured application instances. 
+  Every application instance processes one part of all jobs. One part for an application instance is determined by the object ID in the database modulo 
+  of the amount of application instances which then must match to the application index. 
+  See details in <a href=".src/main/java/de/grimmpp/cloudFoundry/resourceScheduler/model/database/ServiceInstanceRepository.java">ServiceInstanceRepository.java</a>. 
+* **Multi-Threaded processing of service plans**: Each service plan is processed one after the other. 
+  This makes it easier to keep the memory consumption smaller and the logging output is also better to read. 
+  For the processing of a service plan you can set the environment variable `max-threads-per-service-plan-scheduler` 
+  in order to define the max parallel running threads. This setting applies to all service plans.
 * **Spring Boot** is used as Java Framework
   * **Spring Boot Security** (Basic Auth) is implemented.
   * **Spring Boot JPA & Hibernate** is used for DB connection.
@@ -30,13 +38,23 @@ For details have a look into the <a href="./src/main/java/de/grimmpp/cloudFoundr
 * In the section/module test there is an additional RestController which **mocks** the **Cloud Foundry API** in order to test the full roundtrip of API calls to Cloud Foundry. (OAuth tests are not included.)
 * **Lombock** is used to keed class definitions simpler.
 * Catalog descriptions can be trimmed optionally because of PCF DB field length limitations (255 chars) `trim-catalog-descriptions: true`
+* **Http Sender Identifier**: In every call which is done by the Resource Scheduler application there is a header 
+  `X-CF-SENDER-APP-INSTANCE` set, containing the application GUID and the application index 
+  so that every called component can identify from where the request was sent. 
+* **Optimized Memory Settings:** The memory consumption was analysed. Mainly it depends on how many concurrent 
+  worker threads are running in parallel and how many service instances are created. In general the 
+  <a href="https://github.com/cloudfoundry/java-buildpack-memory-calculator">Memory Calculator</a> 
+  which is bundled by default in the <a href="https://github.com/cloudfoundry/java-buildpack">java-buildpack</a>
+  does a very good job. The only thing which came out during the tests was that ReservedCodeCacheSize is always 
+  set to 250MB which is for this application quite high. By setting `JAVA_OPTS: '-XX:ReservedCodeCacheSize=50M'`  I 
+  could reduce the amount of Memory by 200MB. See also for example settings: 
+  <a href="./deployIntoCfdev/resourceScheduler_manifest.yml">resourceScheduler_manifest.yml</a>
 * **Planned Things**
-  * Multi-threaded scheduler for all service plans
   * sync job which checks if broker db is in same state like cf db, only regarding its own instances.
-  * reduction of memory consumption
   * Tracing for http communication
   * Improve detection of what should be triggered so that there are not that many calls against cloud foundry or its own database.
   * Collect list of failed calls and make it available for service plan instance owner.
+  * Create statistics incl. memory consumption and processing durations of service plans. 
 
 ## How to build and run unit tests
 ````

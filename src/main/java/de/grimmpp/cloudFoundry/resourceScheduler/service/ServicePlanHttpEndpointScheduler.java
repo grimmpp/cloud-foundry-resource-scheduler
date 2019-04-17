@@ -21,6 +21,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -32,6 +33,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 @Service
 @Slf4j
@@ -43,40 +45,52 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
     private RestTemplate restTemplate = null;
     private RestTemplate noSslRestTempalte = null;
 
-    private RestTemplate getRestTemplate(boolean sslEnabled) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    @PostConstruct
+    public void createRestTemplates() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        createNoSslRestTemplate();
+        createRestTemplate();
+    }
+
+    private void createNoSslRestTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        if (noSslRestTempalte == null) {
+            TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+
+            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
+                    .loadTrustMaterial(null, acceptingTrustStrategy)
+                    .build();
+
+            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setSSLSocketFactory(csf)
+                    .build();
+
+            HttpComponentsClientHttpRequestFactory requestFactory =
+                    new HttpComponentsClientHttpRequestFactory();
+
+            requestFactory.setHttpClient(httpClient);
+            requestFactory.setConnectTimeout(500);
+            requestFactory.setReadTimeout(500);
+
+            noSslRestTempalte = new RestTemplate(requestFactory);
+        }
+    }
+
+    private void createRestTemplate() {
+        if (restTemplate == null) {
+            SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+            requestFactory.setConnectTimeout(500);
+            requestFactory.setReadTimeout(500);
+            restTemplate = new RestTemplate(requestFactory);
+        }
+    }
+
+    private RestTemplate getRestTemplate(boolean sslEnabled) {
         if (!sslEnabled) {
-            log.debug("Disabled SSL.");
-            if (noSslRestTempalte == null) {
-                TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-
-                SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-                        .loadTrustMaterial(null, acceptingTrustStrategy)
-                        .build();
-
-                SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-
-                CloseableHttpClient httpClient = HttpClients.custom()
-                        .setSSLSocketFactory(csf)
-                        .build();
-
-                HttpComponentsClientHttpRequestFactory requestFactory =
-                        new HttpComponentsClientHttpRequestFactory();
-
-                requestFactory.setHttpClient(httpClient);
-                requestFactory.setConnectTimeout(500);
-                requestFactory.setReadTimeout(500);
-
-                noSslRestTempalte = new RestTemplate(requestFactory);
-            }
+            log.debug("SSL is disabled for this call!");
             return noSslRestTempalte;
 
         } else {
-            if (restTemplate == null) {
-                SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-                requestFactory.setConnectTimeout(500);
-                requestFactory.setReadTimeout(500);
-                restTemplate = new RestTemplate(requestFactory);
-            }
             return restTemplate;
         }
     }
@@ -91,22 +105,20 @@ public class ServicePlanHttpEndpointScheduler extends IServicePlanBasedOnService
             String timeKey = TimeParameterValidator.getContainedTimeParameter(params);
             String time = Parameter.getParameterValueByKey(params, timeKey);
             log.debug("Time is expired after -> mode: '{}' parameter: {}.", timeKey, time);
-            try {
-                HttpEntity<String> entity = new HttpEntity<>(getHeaders(params));
-                String url = Parameter.getParameterValueByKey(params, Parameter.KEY_URL);
-                String httpMethod = Parameter.getParameterValueByKey(params, Parameter.KEY_HTTP_METHOD);
-                Boolean sslEnabled = Boolean.valueOf(Parameter.getParameterValueByKey(params, Parameter.KEY_SSL_ENABLED));
 
-                log.debug("Do {} call to url {}", httpMethod, url);
-                getRestTemplate(sslEnabled).exchange(url, HttpMethod.valueOf(httpMethod), entity, String.class);
+            HttpEntity<String> entity = new HttpEntity<>(getHeaders(params));
+            String url = Parameter.getParameterValueByKey(params, Parameter.KEY_URL);
+            String httpMethod = Parameter.getParameterValueByKey(params, Parameter.KEY_HTTP_METHOD);
+            Boolean sslEnabled = Boolean.valueOf(Parameter.getParameterValueByKey(params, Parameter.KEY_SSL_ENABLED));
 
-                // Remember last http call made.
-                Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL).setValue(Long.toString(System.currentTimeMillis()));
-                pRepo.save(Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL));
-                log.info("=> Instance {} called via {} {} ", si.getServiceInstanceId(), httpMethod, url);
-            } catch (Throwable e) {
-                log.error("Was not able to do http call.", e);
-            }
+            log.debug("Do {} call to url {}", httpMethod, url);
+            getRestTemplate(sslEnabled).exchange(url, HttpMethod.valueOf(httpMethod), entity, String.class);
+
+            // Remember last http call made.
+            Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL).setValue(Long.toString(System.currentTimeMillis()));
+            pRepo.save(Parameter.getParameterByKey(params, Parameter.KEY_LAST_CALL));
+            log.info("=> Instance {} called via {} {} ", si.getServiceInstanceId(), httpMethod, url);
+
         } else {
             log.debug("time is not expired.");
         }

@@ -10,5 +10,5 @@ public interface IServicePlan {
     void saveRequestParamters(CreateServiceInstanceRequest request);
     void saveRequestParamters(CreateServiceInstanceBindingRequest request);
 
-    void run() throws IOException;
+    void run() throws IOException, InterruptedException;
 }

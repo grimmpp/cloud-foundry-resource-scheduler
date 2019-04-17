@@ -15,7 +15,8 @@ applications:
       spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MariaDBDialect
       spring.jpa.properties.hibernate.globally_quoted_identifiers: "true"
       application-instances-count: 1
-      JAVA_OPTS: '-Xmx150M -XX:MaxMetaspaceSize=100M -Xss50M -XX:ReservedCodeCacheSize=100M -XX:+PrintGCDetails'
+      JAVA_OPTS: '-XX:ReservedCodeCacheSize=50M'
+      #JAVA_OPTS: '-Xmx150M -XX:MaxMetaspaceSize=100M -Xss50M -XX:ReservedCodeCacheSize=100M -XX:+PrintGCDetails'
     instances: 1
     memory: 300M
     routes:

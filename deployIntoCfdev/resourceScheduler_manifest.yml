@@ -8,18 +8,21 @@ applications:
       CF_ADMIN_USERNAME: admin
       cfClient.SSL-Validation-enabled: "false"
       logging.level.de.grimmpp.cloudFoundry.resourceScheduler: DEBUG
+      #logging.level.de.grimmpp.cloudFoundry.resourceScheduler: INFO
       management.endpoints.enabled-by-default: "true"
       management.endpoints.web.exposure.include: '*'
       scheduling-enabled: "true"
+      max-threads-per-service-plan-scheduler: 25
       spring.jpa.hibernate.ddl-auto: update
       spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MariaDBDialect
       spring.jpa.properties.hibernate.globally_quoted_identifiers: "true"
-      #JAVA_OPTS: '-XX:ReservedCodeCacheSize=50M'
-      JAVA_OPTS: '-Xmx200M -XX:MaxMetaspaceSize=120M -Xss50M'
+      JAVA_OPTS: '-XX:ReservedCodeCacheSize=50M'
+      # Java memory calculator works very well the only thing is that ReservedCodeCache is set to 250M by default which is quite high.
+      #JAVA_OPTS: '-Xmx300M -XX:MaxMetaspaceSize=120M -Xss50M -XX:ReservedCodeCacheSize=50M'
     instances: 1
-    memory: 384M
-#    routes:
-#      - route: resourceScheduler.dev.cfdev.sh
+    memory: 512M
+    routes:
+      - route: resourceScheduler.dev.cfdev.sh
     services:
       - mysql
     stack: cflinuxfs3
